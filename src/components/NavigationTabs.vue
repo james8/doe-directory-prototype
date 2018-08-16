@@ -1,0 +1,217 @@
+<template>
+    <div id="navigation-tabs" @keyup="CloseMobileMenu($event);">
+        <ul class="menu normalMenu" role="menu">
+            <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
+                <router-link :to="route.path">{{ route.name }}</router-link>
+            </li>
+            <li class="portal menuItem" role="menuItem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
+                <button type="button" @click="ChangePortal(portalTab.route);">{{ portalTab.title }}</button>
+            </li>
+        </ul>
+
+        <div class="menu mobileMenu">
+            <button type="button" class="menuToggle fas fa-bars" @click="OpenMobileMenu();"></button>
+            <ul role="menu" v-bind:class="cssMenuClass" aria-hidden="true" inert>
+                <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
+                    <router-link :to="route.path" @click.native="CloseMobileMenu();">{{ route.name }}</router-link>
+                </li>
+                <li class="portal menuItem" role="menuItem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
+                    <button type="button" @click="ChangePortal(portalTab.route); CloseMobileMenu();">{{ portalTab.title }}</button>
+                </li>
+            </ul>
+        </div>
+        <div class="backdrop" v-bind:class="cssMenuClass" @click="CloseMobileMenu();"></div>
+    </div>
+</template>
+
+<script lang="ts">
+    import { Vue, Component, Prop } from 'vue-property-decorator';
+
+    class PortalTab {
+        id: number = -1;
+        title: string = "";
+        route: string = "";
+        portal: boolean = false;    // portal shown
+
+        constructor(id: number, title: string, route: string, portal: boolean) {
+            this.id = id;
+            this.title = title;
+            this.route = route;
+            this.portal = portal;
+        }
+    }
+
+    @Component
+    export default class NavigationTabs extends Vue {
+        routes: Array<any> = [];
+        portal: boolean = false;    // portal - 0: Public, 1: Admin
+        portalTabs: Array<PortalTab> = [];
+        cssMenuClass: string = "";
+
+        constructor() {
+            super();
+            this.portalTabs.push(new PortalTab(0, 'Public Portal', '/search', true));
+            this.portalTabs.push(new PortalTab(1, 'Admin Portal', '/admin/frequently-called', false));
+        }
+
+        // Lifecycle Hooks
+        created(): void {
+            // Get defined routes
+            this.routes = this.$router.options.routes;
+
+            // Determine if route is for Public/Admin
+            this.routes.forEach((route, i) => {
+                const rootPath = route.path.split('/')[1];
+                this.routes[i]['portal'] = (rootPath === 'admin');
+            });
+        }
+
+        ChangePortal(route: string): void {
+            this.$router.push(route);
+            this.portal = !this.portal;
+        }
+
+        OpenMobileMenu(): void {
+            // Open menu
+            this.cssMenuClass = 'menuOpen';
+
+            // Trap focus in menu
+            // using elem.inert = true/false gives error 'does not exist'
+            const attr: string = 'inert';
+            (document.querySelector('.mobileMenu button') as HTMLInputElement).setAttribute(attr, '');
+            (document.querySelector('#navigation-tabs ~ div') as HTMLInputElement).setAttribute(attr, '');
+            (document.querySelector('.mobileMenu ul') as HTMLInputElement).removeAttribute(attr);
+
+            // Set focus to current tab or first available tab (if 404)
+            setTimeout(() => {
+                const toFocus: HTMLInputElement = document.querySelector('.mobileMenu .router-link-active') as HTMLInputElement;
+                (toFocus !== null) ? toFocus.focus() : (document.querySelector('.mobileMenu li a') as HTMLInputElement).focus();
+            }, 50);
+        }
+
+        CloseMobileMenu(event: KeyboardEvent): void {
+            if ((event === undefined) || (event.key === 'Escape')) {
+                // Un-trap focus
+                const attr: string = 'inert';
+                const button: HTMLInputElement = document.querySelector('.mobileMenu button') as HTMLInputElement;
+                button.removeAttribute(attr);
+                button.focus();
+                (document.querySelector('#navigation-tabs ~ div') as HTMLInputElement).removeAttribute(attr);
+                (document.querySelector('.mobileMenu ul') as HTMLInputElement).setAttribute(attr, '');
+
+                // Close menu
+                this.cssMenuClass = "";
+
+                // Set focus to Menu button
+                setTimeout(() => {
+                    (document.querySelector('.mobileMenu button') as HTMLInputElement).focus();
+                }, 50);
+            }
+        }
+    }
+</script>
+
+<style scoped>
+    .menu {
+        background: linear-gradient(#166f94, #10536f);
+        height: 48px;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0px;
+        padding: 0px 40px;
+        display: flex;
+    }
+
+    .menuItem a, .menuItem button {
+        color: #fff;
+        padding: 15px 40px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .menuItem button {
+        background-color: transparent;
+        border: none;
+        font-size: 16px;
+        height: 100%;
+    }
+
+    .portal {
+        margin-left: auto;
+    }
+
+    .menuToggle {
+        background-color: transparent;
+        border: none;
+        color: #fff;
+        font-size: 22px;
+        width: 48px;
+    }
+
+    .mobileMenu {
+        display: none;
+    }
+
+    .mobileMenu ul {
+        background: linear-gradient(#166f94, #10536f);
+        padding: 0px;
+        width: 225px;
+        position: fixed;
+        top: 0px;
+        bottom: 0px;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-225px);
+        transition: transform 0.2s;
+    }
+
+    .mobileMenu .menuOpen {
+        transform: translateX(0px);
+        transition: transform 0.2s;
+    }
+
+    .mobileMenu li {
+        margin-left: 0px;
+        display: flex;
+    }
+
+    .mobileMenu ul a, .mobileMenu ul button {
+        width: 100%;
+        display: flex;
+    }    
+
+    .menuItem .router-link-exact-active,
+    .menuItem a:hover, .menuItem a:focus,
+    .menuItem button:hover, .menuItem button:focus,
+    .mobileMenu button:hover, .mobileMenu button:focus {
+        background-color: rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+    }
+
+    .backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        position: fixed;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        display: none;
+    }
+
+    .backdrop.menuOpen {
+        display: block;
+    }
+
+    @media (max-width: 1075px) {
+        .normalMenu {
+            display: none;
+        }
+
+        .mobileMenu {
+            display: flex;
+        }
+    }
+</style>
