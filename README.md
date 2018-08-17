@@ -1,4 +1,4 @@
-# directory
+# doe-directory-prototype
 
 ## Project setup
 ```
