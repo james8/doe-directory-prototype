@@ -1,6 +1,6 @@
 <template>
     <div>
-        <form id="search-box-form" @submit="Search();">
+        <form id="search-box-form" @submit.prevent="Search();">
             <div class="searchCategory">
                 <label for="search-categories">Search by...</label>
                 <select name="" id="search-categories" v-model="category" required>

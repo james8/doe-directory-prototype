@@ -1,5 +1,13 @@
 <template>
     <div id="admin-frequently-called">
-        <p>Admin_FrequentlyCalled component working!</p>
+        <span>working</span>
     </div>
 </template>
+
+<script lang="ts">
+    import { Vue } from 'vue-property-decorator';
+
+    export default class Admin_FrequentlyCalled extends Vue {
+            
+    }
+</script>

@@ -4,9 +4,17 @@
             <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
                 <router-link :to="route.path">{{ route.name }}</router-link>
             </li>
-            <li class="portal menuItem" role="menuItem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
-                <button type="button" @click="ChangePortal(portalTab.route);">{{ portalTab.title }}</button>
+            <li class="portal menuItem" role="menuitem" v-if="!isAuthenticated">
+                <button type="button" @click="$adal.login()">Sign In</button>
             </li>
+            <div class="portal" v-if="isAuthenticated">
+                <li class="menuItem" role="menuitem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.id == portal">
+                    <button type="button" @click="ChangePortal(portalTab.route);">{{ portalTab.title }}</button>
+                </li>
+                <li class="menuItem" role="menuitem">
+                    <button type="button" @click="$adal.logout()">Sign Out</button>
+                </li>
+            </div>
         </ul>
 
         <div class="menu mobileMenu">
@@ -15,9 +23,17 @@
                 <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
                     <router-link :to="route.path" @click.native="CloseMobileMenu();">{{ route.name }}</router-link>
                 </li>
-                <li class="portal menuItem" role="menuItem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
-                    <button type="button" @click="ChangePortal(portalTab.route); CloseMobileMenu();">{{ portalTab.title }}</button>
+                <li class="portal menuItem" role="menuitem" v-if="!isAuthenticated">
+                    <button type="button" @click="$adal.login()">Sign In</button>
                 </li>
+                <div class="portal" v-if="isAuthenticated">
+                    <li class="menuItem" role="menuitem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
+                        <button type="button" @click="ChangePortal(portalTab.route); CloseMobileMenu();">{{ portalTab.title }}</button>
+                    </li>
+                    <li class="menuItem" role="menuitem">
+                        <button type="button" @click="$adal.logout()">Sign Out</button>
+                    </li>
+                </div>
             </ul>
         </div>
         <div class="backdrop" v-bind:class="cssMenuClass" @click="CloseMobileMenu();"></div>
@@ -48,22 +64,29 @@
         portalTabs: Array<PortalTab> = [];
         cssMenuClass: string = "";
 
-        constructor() {
-            super();
-            this.portalTabs.push(new PortalTab(0, 'Public Portal', '/search', true));
-            this.portalTabs.push(new PortalTab(1, 'Admin Portal', '/admin/frequently-called', false));
-        }
-
         // Lifecycle Hooks
         created(): void {
             // Get defined routes
             this.routes = this.$router.options.routes;
+
+            this.portalTabs.push(new PortalTab(0, 'Admin Portal', '/admin/frequently-called', false));
+            this.portalTabs.push(new PortalTab(1, 'Public Portal', '/search', true));
 
             // Determine if route is for Public/Admin
             this.routes.forEach((route, i) => {
                 const rootPath = route.path.split('/')[1];
                 this.routes[i]['portal'] = (rootPath === 'admin');
             });
+
+            // Determin portal type (for reloading page) 
+            this.portal = (window.location.pathname.includes('admin'));
+
+            // Redirect if not a defined route (redirecting in router causes some strange behavior)
+            const path = window.location.pathname;
+            if (this.routes.findIndex(route => (route.path === path)) === -1)
+                setTimeout(() => {
+                    this.$router.push("404-page-not-found");
+                }, 50);
         }
 
         ChangePortal(route: string): void {
@@ -140,6 +163,7 @@
 
     .portal {
         margin-left: auto;
+        display: flex;
     }
 
     .menuToggle {
@@ -212,6 +236,11 @@
 
         .mobileMenu {
             display: flex;
+        }
+
+        .mobileMenu .portal {
+            margin-left: 0px;
+            flex-direction: column;
         }
     }
 </style>
