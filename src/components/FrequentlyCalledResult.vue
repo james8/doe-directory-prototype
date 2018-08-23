@@ -60,8 +60,13 @@
     }
 
     .info {
+        border-bottom: 1px solid #000;
         display: grid;
         grid-template-columns: 100px auto;
+    }
+
+    .info:last-of-type {
+        border-bottom: none;
     }
 
     .info:hover {
@@ -76,8 +81,8 @@
         justify-content: flex-start;
     }
 
-    .info span:last-of-type {
-        border-left: 1px solid #000;
+    .info span:first-child {
+        background-color: rgba(243, 243, 243, 0.5);
     }
 
     .longVal {
