@@ -1,5 +1,5 @@
 <template>
-    <div id="navigation-tabs" @keyup="CloseMobileMenu($event);">
+    <div id="NavigationTabs" @keyup="CloseMobileMenu($event);">
         <ul class="menu normalMenu" role="menu">
             <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
                 <router-link :to="route.path">{{ route.name }}</router-link>
@@ -102,7 +102,7 @@
             // using elem.inert = true/false gives error 'does not exist'
             const attr: string = 'inert';
             (document.querySelector('.mobileMenu button') as HTMLInputElement).setAttribute(attr, '');
-            (document.querySelector('#navigation-tabs ~ div') as HTMLInputElement).setAttribute(attr, '');
+            (document.querySelector('#NavigationTabs ~ div') as HTMLInputElement).setAttribute(attr, '');
             (document.querySelector('.mobileMenu ul') as HTMLInputElement).removeAttribute(attr);
 
             // Set focus to current tab or first available tab (if 404)
@@ -119,7 +119,7 @@
                 const button: HTMLInputElement = document.querySelector('.mobileMenu button') as HTMLInputElement;
                 button.removeAttribute(attr);
                 button.focus();
-                (document.querySelector('#navigation-tabs ~ div') as HTMLInputElement).removeAttribute(attr);
+                (document.querySelector('#NavigationTabs ~ div') as HTMLInputElement).removeAttribute(attr);
                 (document.querySelector('.mobileMenu ul') as HTMLInputElement).setAttribute(attr, '');
 
                 // Close menu

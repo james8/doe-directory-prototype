@@ -3,25 +3,23 @@
         <span class="title">{{ title }}</span>
 
         <div id="frequently-called-filter">
-            <label for="filter">Search:</label>
-            <input id="filter" type="text" v-model="filterParam" @input="Filter()" :disabled="loading" />
+            <input-field :id="'filter'" :label="'Search'" :isDisabled="loading" @inputChange="Filter($event);"></input-field>
         </div>
         
         <div class="separator"></div>
-        <Loader :label="'Loading...'" :display="loading"></Loader>
+        <loader :label="'Loading...'" :display="loading"></loader>
 
-        <div id="frequently-called-results" v-if="results.length > 0">
-            <FrequentlyCalledResult v-for="(result, index) in results" :key="index" :result="result"></FrequentlyCalledResult>
-        </div>
+        <user v-for="(result, index) in results" :key="index" :user="result" :type="'frequently-called'"></user>
 
         <span class="noResults" v-if="(tempResults.length > 0) && (results.length === 0)">No matching results</span>
     </div>
 </template>
 
 <script lang="ts">
-    import { Vue, Component, Watch } from 'vue-property-decorator';
-    import FrequentlyCalledResult from '@/components/FrequentlyCalledResult.vue';
-    import Loader from '@/components/Loader.vue';
+    import { Vue, Component, Watch } from "vue-property-decorator";
+    import InputField from "@/components/InputField.vue";
+    import Loader from "@/components/Loader.vue";
+    import User from "@/components/User.vue";
 
     interface IFrequentlyCalledResult {
         Title: string;
@@ -34,8 +32,9 @@
 
     @Component({
         components: {
-            FrequentlyCalledResult,
-            Loader
+            InputField,
+            Loader,
+            User,
         }
     })
     export default class FrequentlyCalled extends Vue {
@@ -104,10 +103,10 @@
             });
         }
 
-        Filter(): void {
+        Filter(event: any): void {
             this.results = this.tempResults;
             this.results = this.results.filter(item => 
-                item.Title.toLowerCase().includes(this.filterParam.toLowerCase())
+                item.Title.toLowerCase().includes(event.toLowerCase())
             );
         }
     }

@@ -3,40 +3,18 @@
         <Backdrop></Backdrop>
         <form id="frequently-called-edit-form">
             <header>{{ result.Title }}</header>
+            <p class="requireAlert">All fields marked with an * are required</p>
 
-            <div class="formItem">
-                <label for="fc-title">Title:</label>
-                <input id="fc-title" :value="result.Title" />
-            </div>
-
-            <div class="formItem">
-                <label for="fc-phone">Phone:</label>
-                <input id="fc-phone" :value="result.Phone" />
-            </div>
-            
-            <div class="formItem">
-                <label for="fc-phone2">Phone 2:</label>
-                <input id="fc-phone2" :value="result.Phone2" />
-            </div>
-            
-            <div class="formItem">
-                <label for="fc-email">Email:</label>
-                <input id="fc-email" :value="result.Email" />
-            </div>
-            
-            <div class="formItem">
-                <label for="fc-site">Site:</label>
-                <input id="fc-site" :value="result.Site" />
-            </div>
-            
-            <div class="formItem">
-                <label for="fc-modified">Modified:</label>
-                <input id="fc-modified" :value="result.Modified" />
-            </div>
+            <InputField :id="'fc-title'" :label="'Title'" :value="result.Title" :isRequired="true"></InputField>
+            <InputField :id="'fc-phone'" :type="'phone'" :label="'Phone'" :value="result.Phone"></InputField>
+            <InputField :id="'fc-phone2'" :label="'Phone 2'" :value="result.Phone2"></InputField>
+            <InputField :id="'fc-email'" :label="'Email'" :value="result.Email"></InputField>
+            <InputField :id="'fc-site'" :label="'Site'" :value="result.Site"></InputField>
+            <InputField :id="'fc-modified'" :label="'Modified'" :value="result.Modified" :isDisabled="true"></InputField>
 
             <div class="buttons">
-                <button type="button" id="fc-form-save" class="btnSuccess" @click="SaveForm();">Save</button>
-                <button type="button" id="fc-form-cancel" class="btnError" @click="CancelForm();">Cancel</button>
+                <button type="button" id="fc-form-save" class="btn btnSuccess" @click="SaveForm();">Save</button>
+                <button type="button" id="fc-form-cancel" class="btn btnError" @click="CancelForm();">Cancel</button>
             </div>
         </form>
     </div>
@@ -44,20 +22,40 @@
 
 <script lang="ts">
     import { Vue, Component, Prop } from 'vue-property-decorator';
+    import InputField from "@/components/InputField.vue";
     import Backdrop from '@/components/Backdrop.vue';
 
     @Component({
-        components: { Backdrop }
+        components: {
+            InputField,
+            Backdrop
+        }
     })
     export default class FrequentlyCalledEdit extends Vue {
         @Prop() result: any;
+
+        original: any = {};
+
+        created() {
+            this.original['title'] = this.result.Title;
+            this.original['phone'] = this.result.Phone
+            this.original['phone2'] = this.result.Phone2;
+            this.original['email'] = this.result.Email;
+            this.original['site'] = this.result.Site;
+            this.original['modified'] = this.result.Modified;
+        }
 
         SaveForm(): void {
             this.$emit('returnedFCData', 'mydata');
         }
 
         CancelForm(): void {
-            this.$emit('returnedFCData', null);
+            console.log(this.result);
+            console.log(this.original);
+            
+            if (confirm("Are you sure you want to close form?")) {
+                this.$emit('returnedFCData', null);
+            }
         }
     }
 </script>
@@ -67,6 +65,7 @@
         background-color: white;
         border-radius: 5px;
         border: 1px solid #000;
+        box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5);
         padding: 20px;
         position: fixed;
         top: 10%;
@@ -82,19 +81,8 @@
         padding: 10px;
     }
 
-    .formItem {
-        padding: 10px;
-        text-align: left;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .formItem label {
-        padding-bottom: 5px;
-    }
-
-    .formItem input {
-        padding: 5px;
+    .requireAlert {
+        font-style: italic;
     }
 
     .buttons {
@@ -105,12 +93,6 @@
     }
 
     #fc-form-save, #fc-form-cancel {
-        border: 1px solid #000;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        margin: 5px 10px;
-        padding: 10px;
         width: 50%;
     }
 

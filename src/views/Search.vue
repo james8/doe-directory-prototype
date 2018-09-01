@@ -2,25 +2,28 @@
     <div id="search">
         <span class="title">{{ title }}</span>
         <SearchBox @returnedSearchResults="ReturnedSearchResults($event);"></SearchBox>
+        
         <div class="separator"></div>
-        <div id="search-results" v-if="Object.keys(results).length > 0">
-            <span class="queryTitle">Results for {{ results.category.toUpperCase() }}: "{{ results.searchParam.toUpperCase() }}"</span>
-            <hr>
-            <SearchResult v-for="(result, index) in results.queryResults" :key="index" :result="result"></SearchResult>
-        </div>
+
+        <User v-for="(result, index) in results.queryResults" :key="index" :user="result" :type="(result.NAME_FIRST_TX === '') ? 'school' : 'person'"></User>
+        <p v-if="(results.queryResults !== undefined) && (results.queryResults.length === 0)">{{ noResults }}</p>
     </div>
 </template>
 
 <script lang="ts">
-    import { Vue, Component } from 'vue-property-decorator';
-    import SearchBox from '../components/SearchBox.vue';
-    import SearchResult from '../components/SearchResult.vue';
+    import { Vue, Component } from "vue-property-decorator";
+    import SearchBox from "@/components/SearchBox.vue";
+    import User from "@/components/User.vue";
 
     @Component({
-        components: { SearchBox, SearchResult }
+        components: {
+            SearchBox,
+            User
+        }
     })
     export default class Search extends Vue {
         title: string = "Directory";
+        noResults: string = "No results found. Please try a different search.";
         results: Object = {};
 
         ReturnedSearchResults(event: Object) {
@@ -52,10 +55,5 @@
         margin: 0px auto;
         max-width: 800px;
         padding-top: 15px;
-    }
-
-    #search-results span {
-        font-size: 24px;
-        padding: 0px 15px;
     }
 </style>

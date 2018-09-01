@@ -16,7 +16,9 @@
             <tbody>
                 <tr class="records" v-for="(result, index) in results" :key="index">
                     <td class="resultIcon">
-                        <span class="fas fa-pencil-alt" @click="Edit(result);"></span>
+                        <button type="button" class="fas fa-pencil-alt" @click="Edit(result, index);" :disabled="editing">
+                            <span class="hidden">Edit {{ result.Title }}</span>
+                        </button>
                     </td>
                     <td>{{ result.Title }}</td>
                     <td>{{ result.Phone }}</td>
@@ -29,11 +31,11 @@
         </table>
 
         <div id="frequently-called-mobile-data" v-for="(result, index) in results" :key="index">
-            <button type="button" class="fas fa-pencil-alt" @click="Edit(result);">
+            <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(result, index);" :disabled="editing">
                 Edit
                 <span class="hidden">{{ result.Title }}</span>
             </button>
-            <FrequentlyCalledResult :result="result"></FrequentlyCalledResult>
+            <User :user="result" :type="'frequently-called'"></User>
         </div>
         <Loader :label="'Loading...'" :display="loading"></Loader>
 
@@ -42,10 +44,10 @@
 </template>
 
 <script lang="ts">
-    import { Vue, Component } from 'vue-property-decorator';
-    import Loader from '@/components/Loader.vue';
-    import FrequentlyCalledResult from '@/components/FrequentlyCalledResult.vue';
-    import FrequentlyCalledEdit from '@/components/FrequentlyCalledEdit.vue';
+    import { Vue, Component } from "vue-property-decorator";
+    import Loader from "@/components/Loader.vue";
+    import User from "@/components/User.vue";
+    import FrequentlyCalledEdit from "@/components/FrequentlyCalledEdit.vue";
 
     interface IFrequentlyCalled {
         Title: string;
@@ -59,7 +61,7 @@
     @Component({
         components: {
             Loader,
-            FrequentlyCalledResult,
+            User,
             FrequentlyCalledEdit
         }
     })
@@ -127,15 +129,23 @@
             });
         }
 
-        Edit(result: any): void {
+        Edit(result: any, index: number): void {
             this.selectedResult = result;
+            this.selectedResult['index'] = index;
             this.editing = true;
+
+            (document.getElementById('NavigationTabs') as HTMLInputElement).setAttribute('inert', '');            
         }
 
         ReturnedFCData(event: any) {
-            console.log(event);
-            this.selectedResult = {};
             this.editing = false;
+            setTimeout(() => {
+                (document.querySelectorAll('#frequently-called-data button')[this.selectedResult.index] as HTMLInputElement).focus();
+                (document.querySelectorAll('#frequently-called-mobile-data button')[this.selectedResult.index] as HTMLInputElement).focus();
+                this.selectedResult = {};
+
+                (document.getElementById('NavigationTabs') as HTMLInputElement).removeAttribute('inert');
+            }, 50);
         }
     }
 </script>
@@ -176,8 +186,14 @@
     }
 
     .resultIcon {
-        font-size: 21px;
         width: 23px;
+    }
+
+    .resultIcon button {
+        background-color: transparent;
+        border: none;
+        font-size: 21px;
+        padding: 0px;
     }
 
     .resultIcon .fas {
@@ -202,12 +218,7 @@
     }
 
     #frequently-called-mobile-data button {
-        border: 1px solid #000;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 15px;
         margin: 10px 0px 0px 10px;
-        padding: 5px 20px;
     }
 
     #frequently-called-mobile-data .fas::before {
