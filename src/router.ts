@@ -23,22 +23,27 @@ export default new Router({
         {
             path: "/search",
             name: "Search",
-            component: (() => import("./views/Search.vue"))
+            component: (() => import("@/views/Search.vue"))
         },
         {
             path: "/frequently-called",
             name: "Frequently Called",
-            component: (() => import("./views/FrequentlyCalled.vue"))
+            component: (() => import("@/views/FrequentlyCalled.vue"))
         },
         {
             path: "/admin/frequently-called",
             name: "Frequently Called",
-            component: (() => import("./views/Admin_FrequentlyCalled.vue"))
+            component: (() => import("@/views/Admin_FrequentlyCalled.vue"))
+        },
+        {
+            path: "/admin/users",
+            name: "Users",
+            component: (() => import("@/views/Admin_Users.vue"))
         },
         {
             path: "/404-page-not-found",
             name: "404",
-            component: (() => import("./views/404.vue"))
+            component: (() => import("@/views/404.vue"))
         },
         // {
         //     path: "*",

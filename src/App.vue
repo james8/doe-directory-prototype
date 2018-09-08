@@ -42,6 +42,70 @@
         color: #42b983;
     }
 
+    table {
+        border: 1px solid #000;
+        margin: 20px;
+        table-layout: fixed;
+        width: calc(100% - 40px);
+    }
+
+    th {
+        background: linear-gradient(#166f94, #10536f);
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #000;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th:last-of-type, td:last-of-type {
+        border-right: none;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #ddd;
+    }
+
+    table .resultIcon {
+        width: 23px;
+    }
+
+    table .resultIcon button {
+        background-color: transparent;
+        border: none;
+        font-size: 21px;
+        padding: 0px;
+    }
+
+    table .resultIcon .fas {
+        cursor: pointer;
+    }
+
+    table .resultPhone {
+        width: 110px;
+    }
+
+    table .resultExt {
+        width: 45px;
+    }
+
+    table .resultDate {
+        width: 80px;
+    }
+
+    table .wordBreak {
+        word-break: break-all;
+    }
+
+    table .resultModified {
+        width: 90px;
+    }
+
     .btn {
         border: 1px solid rgba(0, 0, 0, 0.25);
         border-radius: 5px;
@@ -76,5 +140,66 @@
 
     .btnError:hover {
         background-color: #E53935;
+    }
+    
+    /* hack for ambiguous links */
+    .hidden {
+        height: 1px;
+        width: 1px;
+        overflow: hidden;
+        display: block;
+    }
+
+    /* form element */
+    .form header {
+        border-bottom: 4px double #000;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+
+    .form .requireAlert {
+        font-style: italic;
+    }
+
+    .form form {
+        background-color: #fff;
+        border-radius: 5px;
+        border: 1px solid #000;
+        box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5);
+        overflow: auto;
+        padding: 20px;
+        position: fixed;
+        top: 10%;
+        right: 25%;
+        bottom: 10%;
+        left: 25%;
+    }
+
+    .form .buttons {
+        padding-top: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .form .buttons button {
+        width: 50%;
+    }
+
+    @media screen and (max-width: 600px) {
+        .form form {
+            right: 5%;
+            left: 5%;
+        }
+
+        .form .buttons {
+            flex-direction: column;
+        }
+
+        .form .buttons button {
+            width: initial;
+        }
     }
 </style>

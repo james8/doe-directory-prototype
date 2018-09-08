@@ -1,113 +1,101 @@
 <template>
-    <div class="wrapper">
+    <div class="form">
         <Backdrop></Backdrop>
         <form id="frequently-called-edit-form">
             <header>{{ result.Title }}</header>
             <p class="requireAlert">All fields marked with an * are required</p>
 
-            <InputField :id="'fc-title'" :label="'Title'" :value="result.Title" :isRequired="true"></InputField>
-            <InputField :id="'fc-phone'" :type="'phone'" :label="'Phone'" :value="result.Phone"></InputField>
-            <InputField :id="'fc-phone2'" :label="'Phone 2'" :value="result.Phone2"></InputField>
-            <InputField :id="'fc-email'" :label="'Email'" :value="result.Email"></InputField>
-            <InputField :id="'fc-site'" :label="'Site'" :value="result.Site"></InputField>
+            <InputField :id="'fc-title'" :label="'Title'" :value="result.Title" :isRequired="true" @inputChange="UpdateResult('Title', $event);"></InputField>
+            <InputField :id="'fc-phone'" :type="'phone'" :label="'Phone'" :value="result.Phone | FPhoneNumber" @inputChange="UpdateResult('Phone', $event);"></InputField>
+            <InputField :id="'fc-phone2'" :type="'phone'" :label="'Phone 2'" :value="result.Phone2 | FPhoneNumber" @inputChange="UpdateResult('Phone2', $event);"></InputField>
+            <InputField :id="'fc-email'" :label="'Email'" :value="result.Email" @inputChange="UpdateResult('Email', $event);"></InputField>
+            <InputField :id="'fc-site'" :label="'Site'" :value="result.Site" @inputChange="UpdateResult('Site', $event);"></InputField>
             <InputField :id="'fc-modified'" :label="'Modified'" :value="result.Modified" :isDisabled="true"></InputField>
 
             <div class="buttons">
-                <button type="button" id="fc-form-save" class="btn btnSuccess" @click="SaveForm();">Save</button>
-                <button type="button" id="fc-form-cancel" class="btn btnError" @click="CancelForm();">Cancel</button>
+                <button type="button" class="btn btnSuccess" @click="SaveForm();">Save</button>
+                <button type="button" class="btn btnError" @click="CancelForm();">Cancel</button>
             </div>
+
+            <Loader :label="'Saving...'" :display="saving"></Loader>
         </form>
     </div>
 </template>
 
 <script lang="ts">
-    import { Vue, Component, Prop } from 'vue-property-decorator';
+    import { Vue, Component, Prop } from "vue-property-decorator";
+    import FPhoneNumber from "@/filters/PhoneNumber.js";
     import InputField from "@/components/InputField.vue";
-    import Backdrop from '@/components/Backdrop.vue';
+    import Backdrop from "@/components/Backdrop.vue";
+    import Loader from "@/components/Loader.vue";
 
     @Component({
         components: {
             InputField,
-            Backdrop
+            Backdrop,
+            Loader
+        },
+        filters: {
+            'FPhoneNumber': FPhoneNumber
         }
     })
     export default class FrequentlyCalledEdit extends Vue {
         @Prop() result: any;
+        saving: boolean = false;
 
         original: any = {};
 
         created() {
-            this.original['title'] = this.result.Title;
-            this.original['phone'] = this.result.Phone
-            this.original['phone2'] = this.result.Phone2;
-            this.original['email'] = this.result.Email;
-            this.original['site'] = this.result.Site;
-            this.original['modified'] = this.result.Modified;
+            this.original['Title'] = this.result.Title;
+            this.original['Phone'] = this.result.Phone;
+            this.original['Phone2'] = this.result.Phone2;
+            this.original['Email'] = this.result.Email;
+            this.original['Site'] = this.result.Site;
+            this.original['Modified'] = this.result.Modified;
+        }
+
+        UpdateResult(key: string, event: any): void {
+            this.result[key] = event;
         }
 
         SaveForm(): void {
-            this.$emit('returnedFCData', 'mydata');
+            // disable all form elements while saving form
+            const elems: NodeListOf<Element> = document.querySelectorAll('form input, form button');
+            elems.forEach(elem => (elem.setAttribute('inert', '')));
+
+            // save data
+            this.saving = true;
+            setTimeout(() => {
+                const loaderElem: HTMLElement = document.getElementById('loader') as HTMLElement;
+                loaderElem.scrollIntoView();
+            }, 15);
+
+            setTimeout(() => {
+                this.saving = false;
+                this.$emit('returnedFCData', 'mydata');
+            }, 2000);
         }
 
         CancelForm(): void {
-            console.log(this.result);
-            console.log(this.original);
-            
-            if (confirm("Are you sure you want to close form?")) {
-                this.$emit('returnedFCData', null);
+            const a: any = this.original;
+            const b: any = this.result;
+            const dirty: boolean = (
+                (a.Title !== b.Title)
+                || (a.Phone !== b.Phone)
+                || (a.Phone2 !== b.Phone2)
+                || (a.Email !== b.Email)
+                || (a.Site !== b.Site)
+            );
+
+            if (dirty) {
+                if (confirm("Are you sure you want to close form?")) {
+                    const keys: Array<string> = Object.keys(this.original);
+                    keys.forEach(key => (this.result[key] = this.original[key]));
+
+                    this.$emit('returnedFCData', null);
+                }
             }
+            else this.$emit('returnedFCData', null);
         }
     }
 </script>
-
-<style scoped>
-    #frequently-called-edit-form {
-        background-color: white;
-        border-radius: 5px;
-        border: 1px solid #000;
-        box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5);
-        padding: 20px;
-        position: fixed;
-        top: 10%;
-        right: 25%;
-        left: 25%;
-    }
-
-    header {
-        border-bottom: 4px double #000;
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        padding: 10px;
-    }
-
-    .requireAlert {
-        font-style: italic;
-    }
-
-    .buttons {
-        padding-top: 20px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-    }
-
-    #fc-form-save, #fc-form-cancel {
-        width: 50%;
-    }
-
-    @media screen and (max-width: 600px) {
-        #frequently-called-edit-form {
-            right: 5%;
-            left: 5%;
-        }
-
-        .buttons {
-            flex-direction: column;
-        }
-
-        #fc-form-save, #fc-form-cancel {
-            width: initial;
-        }
-    }
-</style>

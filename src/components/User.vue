@@ -69,6 +69,22 @@
                     ];
                     break;
                 }
+
+                case 'user': {
+                    this.title = `${ user.FirstName } ${ user.LastName }`;
+                    this.info = [
+                        { key: 'Office', value: user.Office },
+                        { key: 'Section', value: user.Section },
+                        { key: 'Phone', value: FPhoneNumber(user.Phone) },
+                        { key: 'Ext', value: user.Ext },
+                        { key: 'Fax', value: FPhoneNumber(user.Fax) },
+                        { key: 'Cellular', value: FPhoneNumber(user.Cellular) },
+                        { key: 'Start Date', value: user.StartDate },
+                        { key: 'End Date', value: user.EndDate },
+                        { key: 'Modified', value: user.Modified },
+                    ];
+                    break;
+                }
             }
         }
     }

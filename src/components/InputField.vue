@@ -16,7 +16,7 @@
             {{ label }}:
             <span class="required" v-if="this.isRequired">*</span>
         </label>
-        <input :id="id" :placeholder="placeHolder" :disabled="isDisabled" :required="isRequired" v-model="vModel" @input="Changed()" @keyup="Changed()" />
+        <input :id="id" :placeholder="placeHolder" :disabled="isDisabled" :required="isRequired" v-model="vModel" @focus="FocusChange(true)" @blur="FocusChange(false)" @keyup="Changed($event)" />
     </div>
 </template>
 
@@ -27,6 +27,9 @@
     @Component({
         components: {
             FPhoneNumber
+        },
+        filters: {
+            'FPhoneNumber': FPhoneNumber
         }
     })
     export default class InputField extends Vue {
@@ -44,12 +47,21 @@
             if (this.value !== undefined) this.vModel = this.value;
         }
 
-        Changed(): void {
+        FocusChange(state: boolean): void {
             switch(this.type) {
                 case 'phone': {
-                    this.vModel = FPhoneNumber(this.vModel);
+                    // add/remove phone# formatting
+                    this.vModel = FPhoneNumber(this.vModel, state);
+                    break;
+                }
+            }
+        }
 
-                    // Add cursor placement code
+        Changed(event: Event): void {
+            switch(this.type) {
+                case 'phone': {
+                    this.$emit('inputChange', FPhoneNumber(this.vModel, true));
+                    break;
                 }
 
                 default: {

@@ -14,23 +14,23 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class="records" v-for="(result, index) in results" :key="index">
+                <tr class="record" v-for="(result, index) in results" :key="index">
                     <td class="resultIcon">
                         <button type="button" class="fas fa-pencil-alt" @click="Edit(result, index);" :disabled="editing">
                             <span class="hidden">Edit {{ result.Title }}</span>
                         </button>
                     </td>
                     <td>{{ result.Title }}</td>
-                    <td>{{ result.Phone }}</td>
-                    <td>{{ result.Phone2 }}</td>
-                    <td class="resultOther">{{ result.Email }}</td>
-                    <td class="resultOther">{{ result.Site }}</td>
+                    <td>{{ result.Phone | FPhoneNumber }}</td>
+                    <td>{{ result.Phone2 | FPhoneNumber }}</td>
+                    <td class="wordBreak">{{ result.Email }}</td>
+                    <td class="wordBreak">{{ result.Site }}</td>
                     <td>{{ result.Modified }}</td>
                 </tr>
             </tbody>
         </table>
 
-        <div id="frequently-called-mobile-data" v-for="(result, index) in results" :key="index">
+        <div id="frequently-called-mobile-view" v-for="(result, index) in results" :key="index">
             <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(result, index);" :disabled="editing">
                 Edit
                 <span class="hidden">{{ result.Title }}</span>
@@ -45,6 +45,7 @@
 
 <script lang="ts">
     import { Vue, Component } from "vue-property-decorator";
+    import FPhoneNumber from "@/filters/PhoneNumber.js";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import FrequentlyCalledEdit from "@/components/FrequentlyCalledEdit.vue";
@@ -63,6 +64,9 @@
             Loader,
             User,
             FrequentlyCalledEdit
+        },
+        filters: {
+            'FPhoneNumber': FPhoneNumber
         }
     })
     export default class Admin_FrequentlyCalled extends Vue {
@@ -90,35 +94,35 @@
                     const results: Array<IFrequentlyCalled> = [
                         {
                             Title: 'ELL',
-                            Phone: '(000) 000-0000',
+                            Phone: '0000000000',
                             Modified: '07/18/2017 00:00:00AM'
                         },
                         {
                             Title: 'FMS, Help Desk',
-                            Phone: '(111) 111-1111',
+                            Phone: '1111111111',
                             Modified: '07/18/2017 00:00:00AM'
                         },
                         {
                             Title: 'Food Services',
-                            Phone: '(222) 222-2222',
-                            Phone2: '(333) 333-3333',
+                            Phone: '2222222222',
+                            Phone2: '3333333333',
                             Modified: '07/18/2017 00:00:00AM'
                         },
                         {
                             Title: 'Fraud and Ethics Hotline',
-                            Phone: '(444) 444-4444',
+                            Phone: '4444444444',
                             Site: 'reportlineweb.com/hidoe',
                             Modified: '07/18/2017 00:00:00AM'
                         },
                         {
                             Title: 'Recruitment - Classified/Support Services Personnel Recruitment',
-                            Phone: '(555) 555-5555',
+                            Phone: '5555555555',
                             Email: 'cssp_recruitment@hawaiidoe.org',
                             Modified: '07/18/2017 00:00:00AM'
                         },
                         {
                             Title: 'TSEAS, Help Desk',
-                            Phone: '(666) 666-6666',
+                            Phone: '6666666666',
                             Email: 'help_tseas@notes.k12.hi.us',
                             Site: 'hawaiipublicschools.org',
                             Modified: '07/18/2017 00:00:00AM'
@@ -134,18 +138,20 @@
             this.selectedResult['index'] = index;
             this.editing = true;
 
+            // disable navigation & edit buttons
+            const elems: NodeListOf<Element> = document.querySelectorAll('.resultIcon button');
+            elems.forEach(elem => (elem.setAttribute('inert', '')));
             (document.getElementById('NavigationTabs') as HTMLInputElement).setAttribute('inert', '');            
         }
 
-        ReturnedFCData(event: any) {
+        ReturnedFCData(event: any): void {
             this.editing = false;
-            setTimeout(() => {
-                (document.querySelectorAll('#frequently-called-data button')[this.selectedResult.index] as HTMLInputElement).focus();
-                (document.querySelectorAll('#frequently-called-mobile-data button')[this.selectedResult.index] as HTMLInputElement).focus();
-                this.selectedResult = {};
+            this.loading = true;
+            this.results = [];
+            this.selectedResult = {};
+            (document.getElementById('NavigationTabs') as HTMLInputElement).removeAttribute('inert');            
 
-                (document.getElementById('NavigationTabs') as HTMLInputElement).removeAttribute('inert');
-            }, 50);
+            this.Load();
         }
     }
 </script>
@@ -157,79 +163,17 @@
         overflow: hidden;
     }
 
-    table {
-        border: 1px solid #000;
-        margin: 20px;
-        table-layout: fixed;
-        width: calc(100% - 40px);
-    }
-
-    th {
-        background: linear-gradient(#166f94, #10536f);
-        border-right: 1px solid #ddd;
-        border-bottom: 1px solid #000;
-        color: #fff;
-        font-weight: normal;
-    }
-
-    th, td {
-        padding: 10px;
-        text-align: left;
-    }
-
-    th:last-of-type, td:last-of-type {
-        border-right: none;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #ddd;
-    }
-
-    .resultIcon {
-        width: 23px;
-    }
-
-    .resultIcon button {
-        background-color: transparent;
-        border: none;
-        font-size: 21px;
-        padding: 0px;
-    }
-
-    .resultIcon .fas {
-        cursor: pointer;
-    }
-
-    .resultPhone {
-        width: 110px;
-    }
-
-    .resultOther {
-        word-break: break-all;
-    }
-
-    .resultModified {
-        width: 90px;
-    }
-
-    #frequently-called-mobile-data {
+    #frequently-called-mobile-view {
         text-align: left;
         display: none;
     }
 
-    #frequently-called-mobile-data button {
+    #frequently-called-mobile-view button {
         margin: 10px 0px 0px 10px;
     }
 
-    #frequently-called-mobile-data .fas::before {
+    #frequently-called-mobile-view .fas::before {
         padding-right: 5px;
-    }
-
-    .hidden {
-        height: 1px;
-        width: 1px;
-        overflow: hidden;
-        display: block;
     }
 
     @media screen and (max-width: 1032px) {
@@ -237,7 +181,7 @@
             display: none;
         }
 
-        #frequently-called-mobile-data {
+        #frequently-called-mobile-view {
             display: block;
         }
     }

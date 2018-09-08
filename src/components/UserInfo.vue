@@ -28,7 +28,7 @@
         border-bottom: 1px solid #000;
         text-align: left;
         display: grid;
-        grid-template-columns: 100px auto;
+        grid-template-columns: 105px auto;
     }
 
     #user-info:last-of-type {
