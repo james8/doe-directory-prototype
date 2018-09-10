@@ -34,10 +34,10 @@
                     <td>{{ result.Phone | FPhoneNumber }}</td>
                     <td>{{ result.Ext }}</td>
                     <td class="resultGrid">
-                        <span v-if="result.Fax !== undefined">F:</span>
-                        <span v-if="result.Fax !== undefined">{{ result.Fax | FPhoneNumber }}</span>
-                        <span v-if="result.Cellular !== undefined">C:</span>
-                        <span v-if="result.Cellular !== undefined">{{ result.Cellular | FPhoneNumber }}</span>
+                        <span v-if="result.Fax !== ''">F:</span>
+                        <span v-if="result.Fax !== ''">{{ result.Fax | FPhoneNumber }}</span>
+                        <span v-if="result.Cellular !== ''">C:</span>
+                        <span v-if="result.Cellular !== ''">{{ result.Cellular | FPhoneNumber }}</span>
                     </td>
                     <td>{{ result.StartDate }}</td>
                     <td>{{ result.EndDate }}</td>
@@ -65,6 +65,7 @@
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
+    import data from "@/../data/usersResults.js";
 
     interface IUser {
         FirstName: string;
@@ -111,28 +112,7 @@
             return new Promise((resolve, reject) => {
                 // Fake data - Run real query here
                 setTimeout(() => {
-                    const results: Array<IUser> = [
-                        {
-                            FirstName: 'John',
-                            LastName: 'Doe',
-                            Office: 'OITS-Information System Services Branch',
-                            Section: 'Web Applic Development',
-                            Phone: '0000000000',
-                            Modified: '09/07/2018 00:00:00AM'
-                        },
-                        {
-                            FirstName: 'Jane',
-                            LastName: 'Doe',
-                            Office: 'OITS-Information System Services Branch',
-                            Section: 'Web Applic Development',
-                            Phone: '0000000000',
-                            Ext: '00000',
-                            Fax: '1111111111',
-                            Cellular: '2222222222',
-                            StartDate: '09/10/2018',
-                            Modified: '09/07/2018 00:00:00AM'
-                        }
-                    ];
+                    const results: Array<IUser> = data;
                     resolve(results);
                 }, 2500);
             })

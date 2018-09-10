@@ -49,6 +49,7 @@
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import FrequentlyCalledEdit from "@/components/FrequentlyCalledEdit.vue";
+    import data from "@/../data/frequentlyCalledResults.js";
 
     interface IFrequentlyCalled {
         Title: string;
@@ -90,43 +91,7 @@
             return new Promise((resolve, reject) => {
                 // Fake data - Run actual data here
                 setTimeout(() => {
-                    const results: Array<IFrequentlyCalled> = [
-                        {
-                            Title: 'ELL',
-                            Phone: '0000000000',
-                            Modified: '07/18/2017 00:00:00AM'
-                        },
-                        {
-                            Title: 'FMS, Help Desk',
-                            Phone: '1111111111',
-                            Modified: '07/18/2017 00:00:00AM'
-                        },
-                        {
-                            Title: 'Food Services',
-                            Phone: '2222222222',
-                            Phone2: '3333333333',
-                            Modified: '07/18/2017 00:00:00AM'
-                        },
-                        {
-                            Title: 'Fraud and Ethics Hotline',
-                            Phone: '4444444444',
-                            Site: 'reportlineweb.com/hidoe',
-                            Modified: '07/18/2017 00:00:00AM'
-                        },
-                        {
-                            Title: 'Recruitment - Classified/Support Services Personnel Recruitment',
-                            Phone: '5555555555',
-                            Email: 'cssp_recruitment@hawaiidoe.org',
-                            Modified: '07/18/2017 00:00:00AM'
-                        },
-                        {
-                            Title: 'TSEAS, Help Desk',
-                            Phone: '6666666666',
-                            Email: 'help_tseas@notes.k12.hi.us',
-                            Site: 'hawaiipublicschools.org',
-                            Modified: '07/18/2017 00:00:00AM'
-                        }
-                    ];
+                    const results: Array<IFrequentlyCalled> = data;
                     resolve(results);
                 }, 2500);
             });
