@@ -45,7 +45,7 @@
 
         original: any = {};
 
-        created() {
+        created(): void {
             this.original['Title'] = this.result.Title;
             this.original['Phone'] = this.result.Phone;
             this.original['Phone2'] = this.result.Phone2;

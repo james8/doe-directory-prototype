@@ -42,8 +42,7 @@
         @Prop() isRequired: any;
         vModel: string = "";
 
-        constructor() {
-            super();
+        created(): void {
             if (this.value !== undefined) this.vModel = this.value;
         }
 

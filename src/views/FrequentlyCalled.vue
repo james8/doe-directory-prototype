@@ -44,8 +44,7 @@
         loading: boolean = true;
         filterParam: string = "";
 
-        constructor() {
-            super();
+        created(): void {
             this.Load();
         }
 

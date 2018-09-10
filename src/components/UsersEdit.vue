@@ -51,7 +51,7 @@
 
         original: any = {};
 
-        created() {
+        created(): void {
             this.title = ((this.result.FirstName !== undefined)
                 ? `${ this.result.FirstName } ${ this.result.LastName }`
                 : "New Employee");

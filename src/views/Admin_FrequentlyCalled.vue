@@ -75,8 +75,7 @@
         loading: boolean = true;
         editing: boolean = false;
 
-        constructor() {
-            super();
+        created(): void {
             this.Load();
         }
 
