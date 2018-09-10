@@ -9,6 +9,8 @@ Download project
 In command prompt, run "npm install -g @vue/cli" if not currently installed
 
 Navigate to project directory and run "npm install"
+
+Download mock data files (from Team's OneDrive -> Projects -> DOE Directory -> Mock Data) and follow instructions in README.txt
 ```
 
 ### Compiles and hot-reloads for development
