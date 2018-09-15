@@ -55,7 +55,7 @@
 
         <Loader :label="'Loading...'" :display="loading"></Loader>
 
-        <UsersEdit v-if="editing" :result="selectedResult" @returnedFormData="ReturnedFormData($event);"></UsersEdit>
+        <UsersEdit v-if="editing" :result="selectedResult" :sections="sections" @returnedFormData="ReturnedFormData($event);"></UsersEdit>
     </div>
 </template>
 
@@ -66,6 +66,7 @@
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
     import data from "@/../data/usersResults.js";
+    import sections from "@/../data/sections.js";
 
     interface IUser {
         FirstName: string;
@@ -93,18 +94,28 @@
     })
     export default class Admin_Users extends Vue {
         results: Array<IUser> = [];
+        sections: Array<any> = [];
         selectedResult: any = {};
         loading: boolean = true;
         editing: boolean = false;
+
+        // DEBUG:
+        formResults: any = {};
 
         created(): void {
             this.Load();
         }
 
+        beforeDestroy(): void {
+            sessionStorage.removeItem('sections-loaded');
+        }
+
         Load(): void {
-            this.QueryUsers().then((results: Array<IUser>) => {
-                this.loading = false;
-                this.results = results;
+            Promise.all([this.QueryUsers(), this.QuerySections()])
+                .then((results: Array<any>) => {
+                    this.loading = false;
+                    this.results = results[0];
+                    this.sections = results[1];
             });
         }
 
@@ -113,18 +124,57 @@
                 // Fake data - Run real query here
                 setTimeout(() => {
                     const results: Array<IUser> = data;
+
+                    try {
+                        if (Object.keys(this.formResults).length > 0) {
+                            results.push({
+                                FirstName: this.formResults.FirstName || '',
+                                LastName: this.formResults.LastName || '',
+                                Office: this.formResults.Office || '',
+                                Section: this.formResults.Section || '',
+                                Phone: this.formResults.Phone || '',
+                                Ext: this.formResults.Ext || '',
+                                Fax: this.formResults.Fax || '',
+                                Cellular: this.formResults.Cellular || '',
+                                StartDate: this.formResults.StartDate || '',
+                                EndDate: this.formResults.EndDate || '',
+                                Modified: this.formResults.Modified || ''
+                            });
+                        }
+                    }
+                    catch(ex) {}
+
                     resolve(results);
                 }, 2500);
-            })
+            });
+        }
+
+        QuerySections(): Promise<Array<Object>> {
+            return new Promise((resolve, reject) => {
+                if (sessionStorage.getItem('sections-loaded') === null) {
+                    // Fake data - Run real query here (may want to filter sections for specific office?)
+                    setTimeout(() => {
+                        sessionStorage.setItem('sections-loaded', 'true');
+                        // filter depending on office
+                        const results: Array<Object> = sections;
+                        resolve(results);
+                    }, 1000);
+                }
+                else resolve(this.sections);
+            });
         }
 
         Add(): void {
-            this.editing = true;
+            this.StartEdit();
         }
 
         Edit(result: IUser, index: number): void {
             this.selectedResult = result;
             this.selectedResult['index'] = index;
+            this.StartEdit();
+        }
+
+        StartEdit(): void {
             this.editing = true;
 
             // disable navigation & edit buttons
@@ -139,6 +189,8 @@
             this.results = [];
             this.selectedResult = {};
             (document.getElementById('NavigationTabs') as HTMLInputElement).removeAttribute('inert');
+
+            this.formResults = event;
 
             this.Load();
         }

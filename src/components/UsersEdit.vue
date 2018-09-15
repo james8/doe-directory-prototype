@@ -5,10 +5,11 @@
             <header>{{ title }}</header>
             <p class="requireAlert">All fields marked with an * are required</p>
 
-            <InputField :id="'u-first-name'" :label="'First Name'" :value="result.FirstName" @inputChange="UpdateResult('FirstName', $event);"></InputField>
-            <InputField :id="'u-last-name'" :label="'Last Name'" :value="result.LastName" :isDisabled="true"></InputField>
+            <InputField :id="'u-first-name'" :label="'First Name'" :value="result.FirstName" :isRequired="true" @inputChange="UpdateResult('FirstName', $event);"></InputField>
+            <InputField :id="'u-last-name'" :label="'Last Name'" :value="result.LastName" @inputChange="UpdateResult('LastName', $event);"></InputField>
             <InputField :id="'u-office'" :label="'Office'" :value="result.Office" :isDisabled="true"></InputField>
-            <InputField :id="'u-section'" :label="'Section'" :value="result.Section" @inputChange="UpdateResult('Section', $event);"></InputField>
+            <!-- <InputField :id="'u-section'" :label="'Section'" :value="result.Section" @inputChange="UpdateResult('Section', $event);"></InputField> -->
+            <SelectBoxField :id="'u-section'" :label="'Section'" :options="sections" :selector="'Section'" :value="result.Section"></SelectBoxField>
             <InputField :id="'u-phone'" :type="'phone'" :label="'Phone'" :value="result.Phone | FPhoneNumber" @inputChange="UpdateResult('Phone', $event);"></InputField>
             <InputField :id="'u-ext'" :label="'Ext'" :value="result.Ext" @inputChange="UpdateResult('Ext', $event);"></InputField>
             <InputField :id="'u-fax'" :type="'phone'" :label="'Fax'" :value="result.Fax | FPhoneNumber" @inputChange="UpdateResult('Fax', $event);"></InputField>
@@ -31,12 +32,14 @@
     import { Vue, Component, Prop } from "vue-property-decorator";
     import FPhoneNumber from "@/filters/PhoneNumber.js";
     import InputField from "@/components/InputField.vue";
+    import SelectBoxField from "@/components/SelectBoxField.vue";
     import Backdrop from "@/components/Backdrop.vue";
     import Loader from "@/components/Loader.vue";
 
     @Component({
         components: {
             InputField,
+            SelectBoxField,
             Backdrop,
             Loader
         },
@@ -46,9 +49,9 @@
     })
     export default class UsersEdit extends Vue {
         @Prop() result: any;
+        @Prop() sections: any;
         saving: boolean = false;
         title: string = "";
-
         original: any = {};
 
         created(): void {
@@ -67,9 +70,12 @@
             this.original['StartDate'] = this.result.StartDate;
             this.original['EndDate'] = this.result.EndDate;
             this.original['Modified'] = this.result.Modified;
+
+            // (document.querySelector('select') as HTMLSelectElement).options[559].selected = true;
         }
 
         UpdateResult(key: string, event: any): void {
+            console.log(key, event)
             this.result[key] = event;
         }
 
@@ -85,9 +91,11 @@
                 loaderElem.scrollIntoView();
             }, 15); 
 
+            // !!should save data here instead of passing back to parent
+            // this.$emit('returnedFormData', 'mydata');
             setTimeout(() => {
                 this.saving = false;
-                this.$emit('returnedFormData', 'mydata');
+                this.$emit('returnedFormData', this.result);
             }, 2000);
         }
 
