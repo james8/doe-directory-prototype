@@ -1,10 +1,11 @@
 import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
-import Adal from "vue-adal";
+// import Adal from "vue-adal";
 
 Vue.config.productionTip = false;
 
+/*
 Vue.use(Adal, {
     config: {
         tenant: "e2879f29-7f5e-457a-9267-3b9c40a59868",
@@ -15,6 +16,7 @@ Vue.use(Adal, {
     requireAuthOnInitialize: false,
     router: router
 });
+*/
 
 new Vue({
     router,

@@ -1,8 +1,8 @@
 <template>
     <div id="admin-users">
-        <button type="button" id="new-btn" class="btn btnNormal" @click="Add();">
+        <!-- <button type="button" id="new-btn" class="btn btnNormal" @click="Add();">
             Add New Employee 
-        </button>
+        </button> -->
 
         <table id="users" cellspacing="0" width="100%">
             <caption>User Information</caption>
@@ -56,11 +56,13 @@
         <Loader :label="'Loading...'" :display="loading"></Loader>
 
         <UsersEdit v-if="editing" :result="selectedResult" :sections="sections" @returnedFormData="ReturnedFormData($event);"></UsersEdit>
+        <button type="button" class="btn btnNormal" @click="GetUserProfile();">GET User Profile</button>
     </div>
 </template>
 
 <script lang="ts">
     import { Vue, Component } from "vue-property-decorator";
+    import Auth from "@/mixins/Auth.js";
     import FPhoneNumber from "@/filters/PhoneNumber.js";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
@@ -90,7 +92,10 @@
         },
         filters: {
             'FPhoneNumber': FPhoneNumber
-        }
+        },
+        mixins: [
+            Auth
+        ]
     })
     export default class Admin_Users extends Vue {
         results: Array<IUser> = [];
@@ -117,6 +122,18 @@
                     this.results = results[0];
                     this.sections = results[1];
             });
+        }
+        
+        GetUserProfile(): void {
+            Auth.methods.Auth_AcquireMSGraphToken()
+                .then(token => {
+                    // console.log(token);
+
+                    Auth.methods.Auth_GetUserProfileExtended(token)
+                        .then(profile => console.log(profile))
+                        .catch(error => console.log(error))
+                })
+                .catch(error => console.log(error));
         }
 
         QueryUsers(): Promise<Array<IUser>> {

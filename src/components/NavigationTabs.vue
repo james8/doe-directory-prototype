@@ -4,15 +4,15 @@
             <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
                 <router-link :to="route.path">{{ route.name }}</router-link>
             </li>
-            <li class="portal menuItem" role="menuitem" v-if="!isAuthenticated">
-                <button type="button" @click="$adal.login()">Sign In</button>
+            <li class="portal menuItem" role="menuitem" v-if="!Auth_IsAuthenticated()">
+                <button type="button" @click="Auth_Login()">Sign In</button>
             </li>
-            <div class="portal" v-if="isAuthenticated">
+            <div class="portal" v-if="Auth_IsAuthenticated()">
                 <li class="menuItem" role="menuitem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.id == portal">
                     <button type="button" @click="ChangePortal(portalTab.route);">{{ portalTab.title }}</button>
                 </li>
                 <li class="menuItem" role="menuitem">
-                    <button type="button" @click="$adal.logout()">Sign Out</button>
+                    <button type="button" @click="Auth_Logout()">Sign Out</button>
                 </li>
             </div>
         </ul>
@@ -23,15 +23,15 @@
                 <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
                     <router-link :to="route.path" @click.native="CloseMobileMenu();">{{ route.name }}</router-link>
                 </li>
-                <li class="portal menuItem" role="menuitem" v-if="!isAuthenticated">
-                    <button type="button" @click="$adal.login()">Sign In</button>
+                <li class="portal menuItem" role="menuitem" v-if="!Auth_IsAuthenticated()">
+                    <button type="button" @click="Auth_Login()">Sign In</button>
                 </li>
-                <div class="portal" v-if="isAuthenticated">
+                <div class="portal" v-if="Auth_IsAuthenticated()">
                     <li class="menuItem" role="menuitem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
                         <button type="button" @click="ChangePortal(portalTab.route); CloseMobileMenu();">{{ portalTab.title }}</button>
                     </li>
                     <li class="menuItem" role="menuitem">
-                        <button type="button" @click="$adal.logout()">Sign Out</button>
+                        <button type="button" @click="Auth_Logout()">Sign Out</button>
                     </li>
                 </div>
             </ul>
@@ -42,6 +42,7 @@
 
 <script lang="ts">
     import { Vue, Component, Prop } from 'vue-property-decorator';
+    import Auth from "@/mixins/Auth.js";
 
     class PortalTab {
         id: number = -1;
@@ -57,7 +58,11 @@
         }
     }
 
-    @Component
+    @Component({
+        mixins: [
+            Auth
+        ]
+    })
     export default class NavigationTabs extends Vue {
         routes: Array<any> = [];
         portal: boolean = false;    // portal - 0: Public, 1: Admin

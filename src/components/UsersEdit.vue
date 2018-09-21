@@ -53,6 +53,7 @@
         saving: boolean = false;
         title: string = "";
         original: any = {};
+        authenticationContext: any;
 
         created(): void {
             this.title = ((this.result.FirstName !== undefined)
