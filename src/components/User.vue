@@ -34,27 +34,34 @@
             const user = this.user;
             switch(this.type) {
                 case 'school': {
-                    this.title = user.Office;
+                    this.title = user.SchoolName;
                     this.info = [
-                        { key: 'Grades', value: user.gradeRange },
-                        { key: 'Island', value: user.island },
-                        { key: 'Principal', value: `${ user.principalFirstName } ${ user.principalLastName }` },
-                        { key: 'Address', value: `${ user.streetAddress }, ${ user.streetCity }, ${ user.streetZip }` },
-                        { key: 'Phone', value: FPhoneNumber(user.telephone) },
-                        { key: 'Fax', value: FPhoneNumber(user.fax) },
-                        { key: 'Site', value: user.webSite, longVal: true }
+                        { key: 'Grades', value: user.GradeRange },
+                        { key: 'Island', value: user.Island },
+                        { key: 'Principal', value: `${ user.PrincipalFirstName } ${ user.PrincipalLastName }` },
+                        { key: 'Address', value: user.Address },
+                        { key: 'Phone', value: FPhoneNumber(user.Phone) },
+                        { key: 'Fax', value: FPhoneNumber(user.Fax) },
+                        { key: 'Site', value: user.Site, longVal: true }
                     ];
                     break;
                 }
 
                 case 'person': {
-                    this.title = `${ user.NAME_FIRST_TX } ${ user.NAME_LAST_TX }`;
-                    this.info = [
-                        { key: 'Office', value: user.Office },
-                        { key: 'Position', value: user.EXP_OBJ_DESC_TX },
-                        { key: 'Phone', value: FPhoneNumber(user.telephone) },
-                        { key: 'Fax', value: FPhoneNumber(user.fax) }
-                    ];
+                    const names: Array<string> = user.Name.split(',');
+                    this.title = (names.length > 1) ? `${ names[1].trim() } ${ names[0].trim() }` : names[0].trim();
+
+                    const isSchool = (user.Type === 'S');
+                    this.info = [];
+                    this.info.push({ key: (isSchool ? 'District' : 'Office'), value: user.District });
+                    this.info.push({ key: (isSchool ? 'Complex Area' : 'Branch'), value: user.ComplexArea });
+                    this.info.push({ key: (isSchool ? 'Complex' : 'Section'), value: user.Complex });
+                    if (user.Complex !== user.Section)
+                        this.info.push({ key: (isSchool ? 'School' : 'Sub-Section'), value: user.Section });
+                    this.info.push({ key: 'Position', value: user.Position });
+                    this.info.push({ key: 'Phone', value: FPhoneNumber(user.telephone) });
+                    this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
+
                     break;
                 }
 
@@ -73,15 +80,21 @@
                 case 'user': {
                     this.title = `${ user.FirstName } ${ user.LastName }`;
                     this.info = [
-                        { key: 'Office', value: user.Office },
-                        { key: 'Section', value: user.Section },
-                        { key: 'Phone', value: FPhoneNumber(user.Phone) },
-                        { key: 'Ext', value: user.Ext },
-                        { key: 'Fax', value: FPhoneNumber(user.Fax) },
-                        { key: 'Cellular', value: FPhoneNumber(user.Cellular) },
-                        { key: 'Start Date', value: user.StartDate },
-                        { key: 'End Date', value: user.EndDate },
-                        { key: 'Modified', value: user.Modified },
+                        { key: 'District', value: user.District },
+                        { key: 'Complex Area', value: user.ComplexArea },
+                        { key: 'Complex', value: user.Complex },
+                        { key: 'Section', value: `${ user.Section } - ${ user.SectionId }` },
+                        { key: 'Position', value: user.Position},
+
+                        // { key: 'Office', value: user.Office },
+                        // { key: 'Section', value: user.Section },
+                        // { key: 'Phone', value: FPhoneNumber(user.Phone) },
+                        // { key: 'Ext', value: user.Ext },
+                        // { key: 'Fax', value: FPhoneNumber(user.Fax) },
+                        // { key: 'Cellular', value: FPhoneNumber(user.Cellular) },
+                        // { key: 'Start Date', value: user.StartDate },
+                        // { key: 'End Date', value: user.EndDate },
+                        // { key: 'Modified', value: user.Modified },
                     ];
                     break;
                 }

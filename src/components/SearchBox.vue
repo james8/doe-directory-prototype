@@ -1,22 +1,14 @@
 <template>
     <div>
         <form id="search-box-form" @submit.prevent="Search();">
-            <!-- <div class="searchCategory">
-                <label for="search-categories">Search by...</label>
-                <select name="" id="search-categories" v-model="category" required>
-                    <option></option>
-                    <option value="person">Person</option>
-                    <option value="office">Office</option>
-                    <option value="district">District</option>
-                    <option value="section">Section</option>
-                    <option value="?">???</option>
-                </select>
-                <p class="error" v-if="errors.categoryError">Please select a category</p>
-            </div> -->
             <div class="searchParam">
-                <!-- <input type="text" placeholder="John Doe" v-model="searchParam" required /> -->
-                <input-field :id="'search'" :placeHolder="'John Doe'" :isRequired="true" @inputChange="SaveValue($event)"></input-field>
-                <button type="button" class="btn btnNormal" @click="Search()" :disabled="searchParam.length <= 3">Search</button>
+                <input-field :id="'search'" :label="'Search'" :placeHolder="'I want to search for...'" @inputChange="SaveValue($event)"></input-field>
+                <button type="button" class="btn btnNormal" @click="Search()">Search</button>
+            </div>
+            <div class="searchTip">
+                <span>Enter a Name, Phone #, Position, Office or any partial combination.</span>
+                <br/><br/>
+                <span>Having trouble? Navigate to the <a href="">help page</a> for a list of all possible parameters that can be used and examples.</span>
             </div>
             <p class="error" v-if="errors.searchParamError">Please enter a search parameter</p>
         </form>
@@ -25,28 +17,21 @@
 </template>
 
 <script lang="ts">
-    import { Vue, Component } from "vue-property-decorator";
+    import { Vue, Component, Prop } from "vue-property-decorator";
     import Loader from "@/components/Loader.vue";
     import InputField from "@/components/InputField.vue";
-    import data from "@/../data/results.js";
+
+    // mock data
+    import sses from "@/../data/sses.js";
+    import data from "@/../data/users.js";
 
     interface IError {
-        // categoryError: boolean;
         searchParamError: boolean;
     }
 
-    interface IResult {
-        FirstName: string;
-        LastName: string;
-        Phone: string;
-        Fax?: string;
-        Cellular?: string;
-    }
-
     interface IReturnObj {
-        // category: string;
         searchParam: string;
-        queryResults: Object | Array<IResult>;
+        queryResults: Object;
     }
 
     @Component({
@@ -56,10 +41,10 @@
         }
     })
     export default class SearchBox extends Vue {
-        // category: string = "";
+        @Prop() advancedOptions: any;
+
         searchParam: string = "";
         errors: IError = {
-            // categoryError: false,
             searchParamError: false
         };
         searching: boolean = false;
@@ -69,40 +54,67 @@
             (document.querySelector('.searchParam button') as HTMLInputElement).focus();
             
             // Error checking
-            // this.errors.categoryError = (this.category === "");
-            this.errors.searchParamError = (this.searchParam === "");
+            this.errors.searchParamError = ((this.searchParam.length <= 3) && (this.advancedOptions === ''));
 
             // Query if form valid
             if (!Object.values(this.errors).includes(true)) {
                 this.searching = true;
 
-                this.QueryResults().then((results: Array<Object | IResult>) => {
-                    this.searching = false;
-                    const returnObj: IReturnObj = {
-                        // category: this.category,
-                        searchParam: this.searchParam,
-                        queryResults: results
-                    };
+                const searchParams: Array<string> = `${ this.searchParam } ${ this.advancedOptions }`.toLowerCase().split(/[\s,]+/);
+                Promise.all([this.QuerySchools(searchParams), this.QueryPeople(searchParams)])
+                    .then((results: Array<any>) => {
+                        this.searching = false;
 
-                    this.$emit('returnedSearchResults', returnObj);
-                });
+                        let queryResults: Array<Object> = [];
+                        results[0].forEach((result: Object) => queryResults.push(result));
+                        results[1].forEach((result: Object) => queryResults.push(result));
+
+                        const returnObj: IReturnObj = {
+                            searchParam: this.searchParam,
+                            queryResults: queryResults
+                        };
+                        this.$emit('returnedSearchResults', returnObj);
+                    });
             }
         }
 
-        QueryResults(): Promise<Array<Object | IResult>> {
+        QuerySchools(searchParams: Array<string>): Promise<Array<Object>> {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    let results: Array<any> = sses;
+
+                    // Filter data based on search string (done for demo purposes only, should be done in SQL call)
+                    searchParams.forEach(param => {
+                        results = results.filter(result => 
+                            result.SchoolName.toLowerCase().includes(param)
+                            || result.PrincipalFirstName.toLowerCase().includes(param)
+                            || result.PrincipalLastName.toLowerCase().includes(param)
+                            || result.Address.toLowerCase().includes(param)
+                            || result.Phone.toLowerCase().includes(param)
+                            || result.Fax.toLowerCase().includes(param)
+                            || result.Site.toLowerCase().includes(param)
+                        );
+                    });
+                    resolve(results);
+                }, 1000);
+            })
+        }
+
+        QueryPeople(searchParams: Array<string>): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
                 // Timeout to pretend loading
                 setTimeout(() => {
                     let results: Array<any> = data;
 
                     // Filter data based on search string (done for demo purposes only, should be done in SQL call)
-                    const searchParams: Array<string> = this.searchParam.toLowerCase().split(/[\s,]+/);
                     searchParams.forEach(param => {
                         results = results.filter(result => 
-                            result.Office.toLowerCase().includes(param)
-                            || result.NAME_FIRST_TX.toLowerCase().includes(param)
-                            || result.NAME_LAST_TX.toLowerCase().includes(param)
-                            || result.EXP_OBJ_DESC_TX.toLowerCase().includes(param)
+                            result.District.toLowerCase().includes(param)
+                            || result.ComplexArea.toLowerCase().includes(param)
+                            || result.Complex.toLowerCase().includes(param)
+                            || result.Section.toLowerCase().includes(param)
+                            || result.Posn.toLowerCase().includes(param)
+                            || result.Name.toLowerCase().includes(param)
                         );
                     });
                     resolve(results);
@@ -121,24 +133,15 @@
         margin: 20px;
     }
 
-    /* .searchCategory {
-        padding-bottom: 10px;
-        display: grid;
-        grid-template-rows: repeat(2, auto);
-    } */
-
-    /* .searchCategory label {
-        padding-bottom: 5px;
-        text-align: left;
-    } */
-
     .searchParam {
         display: grid;
         grid-template-columns: 75% 25%;
     }
 
     .searchParam button {
+        height: 39px;
         margin-left: 10px;
+        align-self: end;
     }
 
     .error {
@@ -148,6 +151,16 @@
         font-weight: bold;
         margin: 5px;
         display: flex;
+    }
+
+    .searchTip {
+        background-color: rgba(197, 245, 193, 0.5);
+        border-radius: 5px;
+        font-size: 14px;
+        font-style: italic;
+        margin-top: 10px;
+        padding: 10px;
+        text-align: left;
     }
 
     @media screen and (max-width: 450px) {

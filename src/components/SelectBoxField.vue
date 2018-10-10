@@ -7,6 +7,8 @@
     @Prop value?: string        -> Value passed to select-box field (optional)
     @Prop isDisabled?: boolean  -> Flag if select-box field is disabled/enabled (optional)
     @Prop isRequired?: boolean  -> Flag if select-box field is required (optional)
+
+    Output  -> Function called when select changed; Passes id & value of select field back to parent Component
 -->
 
 <template>
@@ -15,7 +17,8 @@
             {{ label }}:
             <span class="required" v-if="this.isRequired">*</span>
         </label>
-        <select :id="id" :value="value" :disabled="isDisabled" :required="isRequired">
+        <select :id="id" :value="value" :disabled="isDisabled" :required="isRequired" @change="Changed($event);">
+            <option value="" selected>- Select -</option>
             <option v-for="(option, index) in options" :key="index" :value="option[selector]">
                 {{ option[selector] }}
             </option>
@@ -35,6 +38,14 @@
         @Prop() value: any;
         @Prop() isDisabled: any;
         @Prop() isRequired: any;
+
+        Changed(event: Event): void {
+            const returnObj: Object = {
+                id: this.id,
+                value: (event.target as HTMLSelectElement).value
+            };
+            this.$emit('selectChange', returnObj);
+        }
     }
 </script>
 

@@ -141,6 +141,22 @@
     .btnError:hover {
         background-color: #E53935;
     }
+
+    .btnDisabled, .btnDisabled:hover {
+        background-color: #d0d0d0;
+        color: #5f5f5f;
+        cursor: not-allowed;
+    }
+
+    .modalTip {
+        background-color: rgba(197, 245, 193, 0.5);
+        border-radius: 5px;
+        font-size: 14px;
+        font-style: italic;
+        margin-top: 10px;
+        padding: 10px;
+        text-align: left;
+    }
     
     /* hack for ambiguous links */
     .hidden {
