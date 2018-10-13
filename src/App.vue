@@ -42,6 +42,27 @@
         color: #42b983;
     }
 
+    
+    .title {
+        font-size: 32px;
+        font-weight: bold;
+        padding: 10px;
+        display: flex;
+    }
+
+    .subTitle {
+        border-bottom: 1px solid #bbb;
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 30px;
+        padding: 10px;
+        display: flex;
+    }
+
+    .indent {
+        padding-left: 20px;
+    }
+
     table {
         border: 1px solid #000;
         margin: 20px;
