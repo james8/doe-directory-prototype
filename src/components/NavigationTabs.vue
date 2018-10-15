@@ -42,7 +42,7 @@
 
 <script lang="ts">
     import { Vue, Component, Prop } from 'vue-property-decorator';
-    import Auth from "@/mixins/Auth.js";
+    import Auth from "@/mixins/Auth.ts";
 
     class PortalTab {
         id: number = -1;
@@ -72,7 +72,7 @@
         // Lifecycle Hooks
         created(): void {
             // Get defined routes
-            this.routes = this.$router.options.routes;
+            this.routes = (this.$router as any).options.routes;
 
             this.portalTabs.push(new PortalTab(0, 'Admin Portal', '/admin/frequently-called', false));
             this.portalTabs.push(new PortalTab(1, 'Public Portal', '/search', true));

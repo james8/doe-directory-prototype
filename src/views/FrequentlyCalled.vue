@@ -20,7 +20,7 @@
     import InputField from "@/components/InputField.vue";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
-    import data from "@/../data/frequentlyCalledResults.js";
+    import data from "@/../data/frequentlyCalledResults.ts";
 
     interface IFrequentlyCalledResult {
         Title: string;

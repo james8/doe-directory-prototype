@@ -22,7 +22,7 @@
 
 <script lang="ts">
     import { Vue, Component, Prop } from "vue-property-decorator";
-    import FPhoneNumber from "@/filters/PhoneNumber.js";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
 
     @Component({
         components: {

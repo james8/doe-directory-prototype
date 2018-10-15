@@ -14,6 +14,8 @@
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
+    "@types/adal": "^1.0.29",
+    "@types/adal-angular": "^1.0.1",
     "@types/jest": "^23.1.4",
     "@vue/cli-plugin-babel": "^3.0.0",
     "@vue/cli-plugin-typescript": "^3.0.0",

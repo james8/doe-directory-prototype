@@ -13,44 +13,45 @@
                     <th scope="col">Office</th>
                     <th scope="col" class="resultPhone">Phone</th>
                     <th scope="col" class="resultExt">Ext</th>
-                    <th scope="col" class="resultOther">Other</th>
-                    <th scope="col" class="resultDate">Start Date</th>
-                    <th scope="col" class="resultDate">End Date</th>
+                    <th scope="col" class="resultPhone">Fax</th>
+                    <th scope="col" class="resultPhone">Cellular</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="record" v-for="(result, index) in results" :key="index">
+                <tr class="record" v-for="(user, index) in users" :key="index">
                     <td class="resultIcon">
-                        <button type="button" class="fas fa-pencil-alt" @click="Edit(result, index);">
-                            <span class="hidden">Edit {{ result.FirstName }} {{ result.LastName }}</span>
+                        <button type="button" class="fas fa-pencil-alt" @click="Edit(user, index);">
+                            <span class="hidden">Edit {{ user.FirstName }} {{ user.LastName }}</span>
                         </button>
                     </td>
-                    <td>{{ result.FirstName }} {{ result.LastName }}</td>
+                    <td>{{ user.FirstName }} {{ user.LastName }}</td>
                     <td>
-                        {{ result.Office }}
+                        {{ user.Section }}
                         <br><br>
-                        {{ result.Section }}
+                        {{ user.Position }}
                     </td>
-                    <td>{{ result.Phone | FPhoneNumber }}</td>
-                    <td>{{ result.Ext }}</td>
-                    <td class="resultGrid">
+                    <td>{{ user.Phone | FPhoneNumber }}</td>
+                    <td>{{ user.Ext }}</td>
+                    <td>{{ user.Fax | FPhoneNumber }}</td>
+                    <td>{{ user.Cellular | FPhoneNumber }}</td>
+                    <!-- <td class="resultGrid">
                         <span v-if="result.Fax !== ''">F:</span>
                         <span v-if="result.Fax !== ''">{{ result.Fax | FPhoneNumber }}</span>
                         <span v-if="result.Cellular !== ''">C:</span>
                         <span v-if="result.Cellular !== ''">{{ result.Cellular | FPhoneNumber }}</span>
                     </td>
                     <td>{{ result.StartDate }}</td>
-                    <td>{{ result.EndDate }}</td>
+                    <td>{{ result.EndDate }}</td> -->
                 </tr>
             </tbody>
         </table>
 
-        <div id="users-mobile-view" v-for="(result, index) in results" :key="index">
-            <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(result, index);">
+        <div id="users-mobile-view" v-for="(user, index) in users" :key="index">
+            <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(user, index);">
                 Edit
-                <span class="hidden">{{ result.FirstName }} {{ result.LastName }}</span>
+                <span class="hidden">{{ user.FirstName }} {{ user.LastName }}</span>
             </button>
-            <User :user="result" :type="'user'"></User>
+            <User :user="user" :type="'user'"></User>
         </div>
 
         <Loader :label="'Loading...'" :display="loading"></Loader>
@@ -62,13 +63,13 @@
 
 <script lang="ts">
     import { Vue, Component } from "vue-property-decorator";
-    import Auth from "@/mixins/Auth.js";
-    import FPhoneNumber from "@/filters/PhoneNumber.js";
+    import Auth from "@/mixins/Auth.ts";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
-    import data from "@/../data/usersResults.js";
-    import sections from "@/../data/sections.js";
+    import data from "@/../data/usersResults.ts";
+    import sections from "@/../data/sections.ts";
 
     interface IUser {
         FirstName: string;
@@ -98,7 +99,7 @@
         ]
     })
     export default class Admin_Users extends Vue {
-        results: Array<IUser> = [];
+        users: Array<any> = [];
         sections: Array<any> = [];
         selectedResult: any = {};
         loading: boolean = true;
@@ -119,49 +120,53 @@
             Promise.all([this.QueryUsers(), this.QuerySections()])
                 .then((results: Array<any>) => {
                     this.loading = false;
-                    this.results = results[0];
+                    this.users = results[0];
                     this.sections = results[1];
             });
         }
         
         GetUserProfile(): void {
             Auth.methods.Auth_AcquireMSGraphToken()
-                .then(token => {
+                .then((token: string) => {
                     // console.log(token);
 
                     Auth.methods.Auth_GetUserProfileExtended(token)
-                        .then(profile => console.log(profile))
-                        .catch(error => console.log(error))
+                        .then((profile: any) => console.log(profile))
+                        .catch((error: any) => console.log(error))
                 })
-                .catch(error => console.log(error));
+                .catch((error: Error) => console.log(error));
         }
 
         QueryUsers(): Promise<Array<IUser>> {
             return new Promise((resolve, reject) => {
                 // Fake data - Run real query here
                 setTimeout(() => {
-                    const results: Array<IUser> = data;
+                    // const results: Array<any> = data;
 
-                    try {
-                        if (Object.keys(this.formResults).length > 0) {
-                            results.push({
-                                FirstName: this.formResults.FirstName || '',
-                                LastName: this.formResults.LastName || '',
-                                Office: this.formResults.Office || '',
-                                Section: this.formResults.Section || '',
-                                Phone: this.formResults.Phone || '',
-                                Ext: this.formResults.Ext || '',
-                                Fax: this.formResults.Fax || '',
-                                Cellular: this.formResults.Cellular || '',
-                                StartDate: this.formResults.StartDate || '',
-                                EndDate: this.formResults.EndDate || '',
-                                Modified: this.formResults.Modified || ''
-                            });
-                        }
-                    }
-                    catch(ex) {}
+                    // format data
+                    let users: Array<any> = [];
+                    data.forEach(d => {
+                        let name: Array<any> = [];
+                        if (d.Name !== undefined) name = d.Name.split(',');
+                        let firstName: string = name[1];
+                        let lastName: string = name[0]; 
+                        if (firstName !== undefined) firstName = firstName.trim();
+                        if (lastName !== undefined) lastName = lastName.trim();
 
-                    resolve(results);
+                        users.push({
+                            Id: d.EmplId,
+                            FirstName: firstName || 'Vacant',
+                            LastName: lastName,
+                            District: d.District,
+                            ComplexArea: d.ComplexArea,
+                            Complex: d.Complex,
+                            Section: d.Section,
+                            SectionId: d.SectionId,
+                            Position: d.Posn
+                        });
+                    })
+
+                    resolve(users);
                 }, 2500);
             });
         }
@@ -203,7 +208,7 @@
         ReturnedFormData(event: any): void {
             this.editing = false;
             this.loading = true;
-            this.results = [];
+            this.users = [];
             this.selectedResult = {};
             (document.getElementById('NavigationTabs') as HTMLInputElement).removeAttribute('inert');
 

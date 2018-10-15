@@ -15,7 +15,7 @@
 <script lang="ts">
     import { Vue, Component, Prop, Watch } from "vue-property-decorator";
     import UserInfo from "@/components/UserInfo.vue";
-    import FPhoneNumber from "@/filters/PhoneNumber.js";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
 
     @Component({
         components: {
@@ -47,7 +47,7 @@
                     break;
                 }
 
-                case 'person': {
+                case 'office': {
                     const names: Array<string> = user.Name.split(',');
                     this.title = (names.length > 1) ? `${ names[1].trim() } ${ names[0].trim() }` : names[0].trim();
 

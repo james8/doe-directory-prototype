@@ -45,11 +45,11 @@
 
 <script lang="ts">
     import { Vue, Component } from "vue-property-decorator";
-    import FPhoneNumber from "@/filters/PhoneNumber.js";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import FrequentlyCalledEdit from "@/components/FrequentlyCalledEdit.vue";
-    import data from "@/../data/frequentlyCalledResults.js";
+    import data from "@/../data/frequentlyCalledResults.ts";
 
     interface IFrequentlyCalled {
         Title: string;

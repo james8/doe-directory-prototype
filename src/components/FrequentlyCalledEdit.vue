@@ -24,7 +24,7 @@
 
 <script lang="ts">
     import { Vue, Component, Prop } from "vue-property-decorator";
-    import FPhoneNumber from "@/filters/PhoneNumber.js";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
     import InputField from "@/components/InputField.vue";
     import Backdrop from "@/components/Backdrop.vue";
     import Loader from "@/components/Loader.vue";

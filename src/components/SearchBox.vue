@@ -5,12 +5,11 @@
                 <input-field :id="'search'" :label="'Search'" :placeHolder="'I want to search for...'" @inputChange="SaveValue($event)"></input-field>
                 <button type="button" class="btn btnNormal" @click="Search()">Search</button>
             </div>
-            <div class="searchTip">
-                <span>Enter a Name, Phone #, Position, Office or any partial combination.</span>
-                <br/><br/>
-                <span>Having trouble? Navigate to the <a href="">help page</a> for a list of all possible parameters that can be used and examples.</span>
+            <p class="error" v-if="errors.searchParamError">Please enter a search parameter with 4 or more characters.</p>
+            <div class="modalTip">
+                <p>Enter a full / partial combination of a Name, Phone #, Position, Office, or any other searchable field. (e.g. entering 'John Doe' or 'do Joh' will return users which contain 'John Doe')</p>
+                <p>Having trouble? Navigate to the <a href="/help" target="blank">help page</a> for a list of all fields that are being searched on and examples.</p>
             </div>
-            <p class="error" v-if="errors.searchParamError">Please enter a search parameter</p>
         </form>
         <Loader :label="'Searching...'" :display="searching"></Loader>
     </div>
@@ -22,8 +21,8 @@
     import InputField from "@/components/InputField.vue";
 
     // mock data
-    import sses from "@/../data/sses.js";
-    import data from "@/../data/users.js";
+    import sses from "@/../data/sses.ts";
+    import data from "@/../data/users.ts";
 
     interface IError {
         searchParamError: boolean;

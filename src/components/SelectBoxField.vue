@@ -1,12 +1,14 @@
 <!--
-    @Prop id: string            -> ID given to select-box field
-    @Prop label?: string        -> Value for label (optional)
-    @Prop options: Array<any>   -> Options used to populate select-box field
-    @Prop selector?: string     -> Field name to use when selecting option values (required if data is a JSON; otherwise optional)
-                                   (e.g. options = [{'Title':'a'},{'Title':'b'}]; selector = 'Title')
-    @Prop value?: string        -> Value passed to select-box field (optional)
-    @Prop isDisabled?: boolean  -> Flag if select-box field is disabled/enabled (optional)
-    @Prop isRequired?: boolean  -> Flag if select-box field is required (optional)
+    @Prop id: string                -> ID given to select-box field
+    @Prop label?: string            -> Value for label (optional)
+    @Prop options: Array<any>       -> Options used to populate select-box field
+    @Prop selectorLabel: string     -> Field name to use for option's label
+                                        (e.g. options = [{'Label':'a'},{'Label':'b'}]; selectorLabel = 'Label')
+    @Prop selectorValue: string     -> Field name to use for option's value
+                                        (e.g. options = [{'Value':'a'},{'Value':'b'}]; selectorValue = 'Value')
+    @Prop value?: string            -> Value passed to select-box field (optional)
+    @Prop isDisabled?: boolean      -> Flag if select-box field is disabled/enabled (optional)
+    @Prop isRequired?: boolean      -> Flag if select-box field is required (optional)
 
     Output  -> Function called when select changed; Passes id & value of select field back to parent Component
 -->
@@ -19,8 +21,8 @@
         </label>
         <select :id="id" :value="value" :disabled="isDisabled" :required="isRequired" @change="Changed($event);">
             <option value="" selected>- Select -</option>
-            <option v-for="(option, index) in options" :key="index" :value="option[selector]">
-                {{ option[selector] }}
+            <option v-for="(option, index) in options" :key="index" :value="option[selectorValue]">
+                {{ option[selectorLabel] }}
             </option>
         </select>
     </div>
@@ -34,7 +36,8 @@
         @Prop() id: any;
         @Prop() label: any;
         @Prop() options: any;
-        @Prop() selector: any;
+        @Prop() selectorLabel: any;
+        @Prop() selectorValue: any;
         @Prop() value: any;
         @Prop() isDisabled: any;
         @Prop() isRequired: any;
