@@ -14,48 +14,51 @@
                 <div v-if="selectedRadioBtn === 0">
                     <div class="searchOption">
                         <label for="district">District</label>
-                        <select-box-field :id="'district'" :options="districts.filter((d) => (d.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'district'" :options="districts.filter((d) => (d.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex-area">Complex Area</label>
-                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex">Complex</label>
-                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="school">School</label>
-                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="position">Position</label>
-                        <select-box-field :id="'position'" :options="positions.filter((p) => (p.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'position'" :options="positions.filter((p) => (p.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                 </div>
                 <!-- State Office -->
                 <div v-else-if="selectedRadioBtn === 1">
                     <div class="searchOption">
                         <label for="district">Office</label>
-                        <select-box-field :id="'district'" :options="districts.filter((district) => (district.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'district'" :options="districts.filter((district) => (district.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex-area">Branch</label>
-                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex">Section</label>
-                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="school">Sub-Section</label>
-                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="position">Position</label>
-                        <select-box-field :id="'position'" :options="positions.filter((p) => (p.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Value'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'position'" :options="positions.filter((p) => (p.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
                     </div>
                 </div>
+            </div>
+            <div class="buttonSection">
+               <button type="button" class="btn btnNormal" @click="ClearFilters();">Clear Filters</button>
             </div>
         </fieldset>
     </div>
@@ -200,6 +203,15 @@
             this.advancedSearchString = `${ aso.District } ${ aso.ComplexArea } ${ aso.Complex } ${ aso.School } ${ aso.Position }`;
             this.$emit('advancedSearchString', ((this.advancedSearchString.trim() === '') ? '' : this.advancedSearchString));
         }
+
+        ClearFilters(): void {
+            this.selectedRadioBtn = -1;
+            const radioBtns: any = document.querySelectorAll('#search-category input');
+            radioBtns.forEach((btn: HTMLInputElement) => (btn.checked = false));
+            this.advancedSearchOptions = new AdvancedSearchOption();
+
+            this.$emit('advancedSearchString', '');
+        }
     }
 </script>
 
@@ -234,5 +246,14 @@
     .advancedLoader {
         margin-left: 10px;
         text-align: left;
+    }
+
+    .buttonSection {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .buttonSection button {
+        padding: 10px 20px;
     }
 </style>
