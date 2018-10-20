@@ -20,10 +20,6 @@
     import Loader from "@/components/Loader.vue";
     import InputField from "@/components/InputField.vue";
 
-    // mock data
-    import sses from "@/../data/sses.ts";
-    import data from "@/../data/users.ts";
-
     interface IError {
         searchParamError: boolean;
     }
@@ -42,6 +38,8 @@
     export default class SearchBox extends Vue {
         @Prop() advancedOptions: any;
 
+        DEBUG: boolean = false;
+
         searchParam: string = "";
         errors: IError = {
             searchParamError: false
@@ -59,7 +57,7 @@
             if (!Object.values(this.errors).includes(true)) {
                 this.searching = true;
 
-                const searchParams: Array<string> = `${ this.searchParam } ${ this.advancedOptions }`.toLowerCase().split(/[\s,]+/);
+                const searchParams: string = `${ this.searchParam } ${ this.advancedOptions }`.toLowerCase();
                 Promise.all([this.QuerySchools(searchParams), this.QueryPeople(searchParams)])
                     .then((results: Array<any>) => {
                         this.searching = false;
@@ -77,47 +75,65 @@
             }
         }
 
-        QuerySchools(searchParams: Array<string>): Promise<Array<Object>> {
+        QuerySchools(searchParams: string): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    let results: Array<any> = sses;
-
-                    // Filter data based on search string (done for demo purposes only, should be done in SQL call)
-                    searchParams.forEach(param => {
-                        results = results.filter(result => 
-                            result.SchoolName.toLowerCase().includes(param)
-                            || result.PrincipalFirstName.toLowerCase().includes(param)
-                            || result.PrincipalLastName.toLowerCase().includes(param)
-                            || result.Address.toLowerCase().includes(param)
-                            || result.Phone.toLowerCase().includes(param)
-                            || result.Fax.toLowerCase().includes(param)
-                            || result.Site.toLowerCase().includes(param)
-                        );
-                    });
-                    resolve(results);
-                }, 1000);
-            })
+                if (this.DEBUG) {
+                    console.log('DEBUG: Using mock data (sses)');
+                    let sses = require('@/../data/sses.ts').default;
+                    
+                    setTimeout(() => {
+                        searchParams.split(/[\s,]+/).forEach(param => {
+                            sses = sses.filter((school: any) => 
+                                school.SchoolName.toLowerCase().includes(param)
+                                || school.PrincipalFirstName.toLowerCase().includes(param)
+                                || school.PrincipalLastName.toLowerCase().includes(param)
+                                || school.Address.toLowerCase().includes(param)
+                                || school.Phone.toLowerCase().includes(param)
+                                || school.Fax.toLowerCase().includes(param)
+                                || school.Site.toLowerCase().includes(param)
+                            );
+                        });
+                        resolve(sses);
+                    }, 1000);
+                }
+                else {
+                    resolve([]);
+                }
+            });
         }
 
-        QueryPeople(searchParams: Array<string>): Promise<Array<Object>> {
+        QueryPeople(searchParams: string): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
-                // Timeout to pretend loading
-                setTimeout(() => {
-                    let results: Array<any> = data;
+                if (this.DEBUG) {
+                    console.log('DEBUG: Using mock data (users)');
+                    let users = require('@/../data/users.ts').default;
 
-                    // Filter data based on search string (done for demo purposes only, should be done in SQL call)
-                    searchParams.forEach(param => {
-                        results = results.filter(result => 
-                            result.District.toLowerCase().includes(param)
-                            || result.ComplexArea.toLowerCase().includes(param)
-                            || result.Complex.toLowerCase().includes(param)
-                            || result.Section.toLowerCase().includes(param)
-                            || result.Posn.toLowerCase().includes(param)
-                            || result.Name.toLowerCase().includes(param)
-                        );
-                    });
-                    resolve(results);
-                }, 3000);
+                    setTimeout(() => {
+                        searchParams.split(/[\s,]+/).forEach(param => {
+                            users = users.filter((user: any) => 
+                                user.District.toLowerCase().includes(param)
+                                || user.ComplexArea.toLowerCase().includes(param)
+                                || user.Complex.toLowerCase().includes(param)
+                                || user.School.toLowerCase().includes(param)
+                                || user.Posn.toLowerCase().includes(param)
+                                || user.Name.toLowerCase().includes(param)
+                                || user.Alias.toLowerCase().includes(param)
+                            );
+                        });
+                        resolve(users);
+                    }, 3000);
+                }
+                else {
+                    let formData: FormData = new FormData();
+                    formData.append('SearchParam', searchParams);
+
+                    fetch('https://localhost:44352/api/users', {
+                        method: 'POST',
+                        body: formData 
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error)); 
+                }
             });
         }
 

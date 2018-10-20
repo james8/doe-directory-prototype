@@ -48,19 +48,18 @@
                 }
 
                 case 'office': {
-                    const names: Array<string> = user.Name.split(',');
-                    this.title = (names.length > 1) ? `${ names[1].trim() } ${ names[0].trim() }` : names[0].trim();
+                    this.title = `${ user.alias || user.firstName } ${ user.lastName }`;
 
-                    const isSchool = (user.Type === 'S');
-                    this.info = [];
-                    this.info.push({ key: (isSchool ? 'District' : 'Office'), value: user.District });
-                    this.info.push({ key: (isSchool ? 'Complex Area' : 'Branch'), value: user.ComplexArea });
-                    this.info.push({ key: (isSchool ? 'Complex' : 'Section'), value: user.Complex });
-                    if (user.Complex !== user.Section)
-                        this.info.push({ key: (isSchool ? 'School' : 'Sub-Section'), value: user.Section });
-                    this.info.push({ key: 'Position', value: user.Position });
-                    this.info.push({ key: 'Phone', value: FPhoneNumber(user.telephone) });
-                    this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
+                    const isSchool = (user.type === 'S');
+                    this.info = [
+                        { key: (isSchool ? 'District' : 'Office'), value: user.district },
+                        { key: (isSchool ? 'Complex Area' : 'Branch'), value: user.complexArea },
+                        { key: (isSchool ? 'Complex' : 'Section'), value: user.complex },
+                        { key: 'Position', value: user.position },
+                        { key: 'Phone', value: ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext: ${ user.extension }`) },
+                        { key: 'Fax', value: FPhoneNumber(user.fax) }
+                    ];
+                    if (user.complex !== user.section) this.info = [...this.info, { key: (isSchool ? 'School' : 'Sub-Section'), value: user.section }];
 
                     break;
                 }

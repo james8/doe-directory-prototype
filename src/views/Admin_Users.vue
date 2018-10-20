@@ -68,7 +68,7 @@
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
-    import data from "@/../data/usersResults.ts";
+    import data from "@/../data/users.ts";
     import sections from "@/../data/sections.ts";
 
     interface IUser {

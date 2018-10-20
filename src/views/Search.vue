@@ -6,7 +6,7 @@
         
         <div class="separator"></div>
 
-        <User v-for="(result, index) in results.queryResults" :key="index" :user="result" :type="(result.EmplId === undefined) ? 'school' : 'office'"></User>
+        <User v-for="(result, index) in results.queryResults" :key="index" :user="result" :type="(result.emplId === undefined) ? 'school' : 'office'"></User>
         <p v-if="(results.queryResults !== undefined) && (results.queryResults.length === 0)">{{ noResults }}</p>
     </div>
 </template>
