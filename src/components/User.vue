@@ -16,6 +16,7 @@
     import { Vue, Component, Prop, Watch } from "vue-property-decorator";
     import UserInfo from "@/components/UserInfo.vue";
     import FPhoneNumber from "@/filters/PhoneNumber.ts";
+import { start } from 'repl';
 
     @Component({
         components: {
@@ -51,15 +52,19 @@
                     this.title = `${ user.alias || user.firstName } ${ user.lastName }`;
 
                     const isSchool = (user.type === 'S');
-                    this.info = [
-                        { key: (isSchool ? 'District' : 'Office'), value: user.district },
-                        { key: (isSchool ? 'Complex Area' : 'Branch'), value: user.complexArea },
-                        { key: (isSchool ? 'Complex' : 'Section'), value: user.complex },
-                        { key: 'Position', value: user.position },
-                        { key: 'Phone', value: ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext: ${ user.extension }`) },
-                        { key: 'Fax', value: FPhoneNumber(user.fax) }
-                    ];
-                    if (user.complex !== user.section) this.info = [...this.info, { key: (isSchool ? 'School' : 'Sub-Section'), value: user.section }];
+                    this.info = [];
+                    this.info.push({ key: (isSchool ? 'District' : 'Office'), value: user.district });
+                    this.info.push({ key: (isSchool ? 'Complex Area' : 'Branch'), value: user.complexArea });
+                    this.info.push({ key: (isSchool ? 'Complex' : 'Section'), value: user.complex });
+                    if (user.complex !== user.school)
+                        this.info.push({ key: (isSchool ? 'School' : 'Sub-Section'), value: user.school });
+                    this.info.push({ key: 'Position', value: user.posn });
+                    if (user.phone !== '')
+                        this.info.push({ key: 'Phone', value: ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext. ${ user.extension }`) });
+                    if (user.fax !== '')
+                        this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
+                    if (user.cellular !== '')
+                        this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular) });
 
                     break;
                 }
