@@ -12,6 +12,10 @@
             </div>
         </form>
         <Loader :label="'Searching...'" :display="searching"></Loader>
+        <div v-if="apiFail">
+            Request failed. Please try again later.
+            <br/><br/>
+        </div>
     </div>
 </template>
 
@@ -45,6 +49,7 @@
             searchParamError: false
         };
         searching: boolean = false;
+        apiFail: boolean = false;
 
         Search(): void {
             // Set focus on submit button
@@ -56,6 +61,7 @@
             // Query if form valid
             if (!Object.values(this.errors).includes(true)) {
                 this.searching = true;
+                this.apiFail = false;
 
                 const searchParams: string = `${ this.searchParam } ${ this.advancedOptions }`.toLowerCase();
                 Promise.all([this.QuerySchools(searchParams), this.QueryPeople(searchParams)])
@@ -71,6 +77,12 @@
                             queryResults: queryResults
                         };
                         this.$emit('returnedSearchResults', returnObj);
+                    })
+                    .catch((error: string) => {
+                        console.log(`ERROR: ${ error }`);
+
+                        this.searching = false;
+                        this.apiFail = true;
                     });
             }
         }
