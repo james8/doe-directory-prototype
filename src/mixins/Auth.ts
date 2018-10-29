@@ -8,6 +8,7 @@ const config: any = {
     tenant: "e2879f29-7f5e-457a-9267-3b9c40a59868",
     clientId: "537395c1-3092-43df-923e-7e2f611b9d55",
     redirectUri: "http://localhost:8080",
+    postLogoutRedirectUri: "http://localhost:8080/search",
     cacheLocation: "localStorage",
     endpoints: "https://graph.microsoft.com"
 };
@@ -19,7 +20,7 @@ if (authenticationContext.isCallback(window.location.hash) || window.self !== wi
 }
 else {
     // try pull the user out of local storage
-    let user:any = authenticationContext.getCachedUser();
+    let user: any = authenticationContext.getCachedUser();
     console.log(user);
     // if (!user) authenticationContext.login();
 }
