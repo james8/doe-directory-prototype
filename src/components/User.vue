@@ -16,12 +16,13 @@
     import { Vue, Component, Prop, Watch } from "vue-property-decorator";
     import UserInfo from "@/components/UserInfo.vue";
     import FPhoneNumber from "@/filters/PhoneNumber.ts";
-import { start } from 'repl';
+    import FDateTime2 from "@/filters/DateTime2.ts";
 
     @Component({
         components: {
             UserInfo,
-            FPhoneNumber
+            FPhoneNumber,
+            FDateTime2
         }
     })
     export default class User extends Vue {
@@ -81,25 +82,26 @@ import { start } from 'repl';
                     break;
                 }
 
-                case 'user': {
-                    this.title = `${ user.FirstName } ${ user.LastName }`;
-                    this.info = [
-                        { key: 'District', value: user.District },
-                        { key: 'Complex Area', value: user.ComplexArea },
-                        { key: 'Complex', value: user.Complex },
-                        { key: 'Section', value: `${ user.Section } - ${ user.SectionId }` },
-                        { key: 'Position', value: user.Position},
+                case 'edit-user': {
+                    this.title = `${ user.alias || user.firstName } ${ user.lastName }`;
 
-                        // { key: 'Office', value: user.Office },
-                        // { key: 'Section', value: user.Section },
-                        // { key: 'Phone', value: FPhoneNumber(user.Phone) },
-                        // { key: 'Ext', value: user.Ext },
-                        // { key: 'Fax', value: FPhoneNumber(user.Fax) },
-                        // { key: 'Cellular', value: FPhoneNumber(user.Cellular) },
-                        // { key: 'Start Date', value: user.StartDate },
-                        // { key: 'End Date', value: user.EndDate },
-                        // { key: 'Modified', value: user.Modified },
-                    ];
+                    const isSchool = (user.type === 'S');
+                    this.info = [];
+                    this.info.push({ key: (isSchool ? 'District' : 'Office'), value: user.district });
+                    this.info.push({ key: (isSchool ? 'Complex Area' : 'Branch'), value: user.complexArea });
+                    this.info.push({ key: (isSchool ? 'Complex' : 'Section'), value: user.complex });
+                    if (user.complex !== user.school)
+                        this.info.push({ key: (isSchool ? 'School' : 'Sub-Section'), value: user.school });
+                    this.info.push({ key: 'Position', value: user.posn });
+                    if (user.phone !== '')
+                        this.info.push({ key: 'Phone', value: ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext. ${ user.extension }`) });
+                    if (user.fax !== '')
+                        this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
+                    if (user.cellular !== '')
+                        this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular) });
+                    this.info.push({ key: 'Modified By', value: user.lastModifiedBy });
+                    this.info.push({ key: 'Modified', value: FDateTime2(user.lastModified) });
+
                     break;
                 }
             }

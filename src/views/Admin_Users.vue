@@ -1,9 +1,5 @@
 <template>
-    <div id="admin-users">
-        <!-- <button type="button" id="new-btn" class="btn btnNormal" @click="Add();">
-            Add New Employee 
-        </button> -->
-
+    <div id="admin-users" v-if="Auth_IsAuthenticated() || DEBUG">
         <table id="users" cellspacing="0" width="100%">
             <caption>User Information</caption>
             <thead>
@@ -15,49 +11,46 @@
                     <th scope="col" class="resultExt">Ext</th>
                     <th scope="col" class="resultPhone">Fax</th>
                     <th scope="col" class="resultPhone">Cellular</th>
+                    <th scope="col">Last Modified</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="record" v-for="(user, index) in users" :key="index">
                     <td class="resultIcon">
-                        <button type="button" class="fas fa-pencil-alt" @click="Edit(user, index);">
-                            <span class="hidden">Edit {{ user.FirstName }} {{ user.LastName }}</span>
+                        <button type="button" class="fas fa-pencil-alt" @click="Edit(user);">
+                            <span class="hidden">Edit {{ user.alias || user.firstName }} {{ user.lastName }}</span>
                         </button>
                     </td>
-                    <td>{{ user.FirstName }} {{ user.LastName }}</td>
+                    <td>{{ user.alias || user.firstName }} {{ user.lastName }}</td>
                     <td>
-                        {{ user.Section }}
+                        {{ user.school }}
                         <br><br>
-                        {{ user.Position }}
+                        {{ user.position }}
                     </td>
-                    <td>{{ user.Phone | FPhoneNumber }}</td>
-                    <td>{{ user.Ext }}</td>
-                    <td>{{ user.Fax | FPhoneNumber }}</td>
-                    <td>{{ user.Cellular | FPhoneNumber }}</td>
-                    <!-- <td class="resultGrid">
-                        <span v-if="result.Fax !== ''">F:</span>
-                        <span v-if="result.Fax !== ''">{{ result.Fax | FPhoneNumber }}</span>
-                        <span v-if="result.Cellular !== ''">C:</span>
-                        <span v-if="result.Cellular !== ''">{{ result.Cellular | FPhoneNumber }}</span>
-                    </td>
-                    <td>{{ result.StartDate }}</td>
-                    <td>{{ result.EndDate }}</td> -->
+                    <td>{{ user.phone | FPhoneNumber }}</td>
+                    <td>{{ user.extension }}</td>
+                    <td>{{ user.fax | FPhoneNumber }}</td>
+                    <td>{{ user.cellular | FPhoneNumber }}</td>
+                    <td>{{ user.lastModifiedBy }}<br/>{{ user.lastModified | FDateTime2 }}</td>
                 </tr>
             </tbody>
         </table>
 
         <div id="users-mobile-view" v-for="(user, index) in users" :key="index">
-            <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(user, index);">
+            <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(user);">
                 Edit
-                <span class="hidden">{{ user.FirstName }} {{ user.LastName }}</span>
+                <span class="hidden">{{ user.firstName }} {{ user.lastName }}</span>
             </button>
-            <User :user="user" :type="'user'"></User>
+            <User :user="user" :type="'edit-user'"></User>
         </div>
 
         <Loader :label="'Loading...'" :display="loading"></Loader>
+        <div v-if="apiFail">
+            Request failed. Please try again later.
+            <br/><br/>
+        </div>
 
-        <UsersEdit v-if="editing" :result="selectedResult" :sections="sections" @returnedFormData="ReturnedFormData($event);"></UsersEdit>
-        <button type="button" class="btn btnNormal" @click="GetUserProfile();">GET User Profile</button>
+        <UsersEdit v-if="editing" :result="selectedResult" @returnedFormData="ReturnedFormData($event);"></UsersEdit>
     </div>
 </template>
 
@@ -65,11 +58,10 @@
     import { Vue, Component } from "vue-property-decorator";
     import Auth from "@/mixins/Auth.ts";
     import FPhoneNumber from "@/filters/PhoneNumber.ts";
+    import FDateTime2 from "@/filters/DateTime2.ts";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
-    import data from "@/../data/users.ts";
-    import sections from "@/../data/sections.ts";
 
     interface IUser {
         FirstName: string;
@@ -92,111 +84,104 @@
             UsersEdit
         },
         filters: {
-            'FPhoneNumber': FPhoneNumber
+            'FPhoneNumber': FPhoneNumber,
+            'FDateTime2': FDateTime2
         },
         mixins: [
             Auth
         ]
     })
     export default class Admin_Users extends Vue {
+        DEBUG: boolean = false;
+
         users: Array<any> = [];
-        sections: Array<any> = [];
         selectedResult: any = {};
         loading: boolean = true;
+        apiFail: boolean = false;
         editing: boolean = false;
 
         // DEBUG:
         formResults: any = {};
 
         created(): void {
-            this.Load();
-        }
+            if (Auth.methods.Auth_IsAuthenticated() || this.DEBUG) {
+                this.Load();
 
-        beforeDestroy(): void {
-            sessionStorage.removeItem('sections-loaded');
+                // Load Edit form if cached data is present
+                const original: Object = JSON.parse(sessionStorage.getItem('user.original') || '{}');
+                if (Object.keys(original).length > 0) this.Edit(original);
+            }
+            else Auth.methods.Auth_Login();
         }
 
         Load(): void {
-            Promise.all([this.QueryUsers(), this.QuerySections()])
-                .then((results: Array<any>) => {
-                    this.loading = false;
-                    this.users = results[0];
-                    this.sections = results[1];
-            });
+            this.GetUserProfile()
+                .then((userProfile: Object) => {
+                    Promise.all([this.QueryPeople(userProfile)])
+                        .then((results: Array<any>) => {
+                            this.loading = false;
+                            this.users = results[0];
+                        })
+                        .catch((error: Error) => this.APIFail(error))
+                })
+                .catch((error: Error) => this.APIFail(error))
         }
         
-        GetUserProfile(): void {
-            Auth.methods.Auth_AcquireMSGraphToken()
-                .then((token: string) => {
-                    // console.log(token);
-
-                    Auth.methods.Auth_GetUserProfileExtended(token)
-                        .then((profile: any) => console.log(profile))
-                        .catch((error: any) => console.log(error))
-                })
-                .catch((error: Error) => console.log(error));
-        }
-
-        QueryUsers(): Promise<Array<IUser>> {
+        GetUserProfile(): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
-                // Fake data - Run real query here
-                setTimeout(() => {
-                    // const results: Array<any> = data;
-
-                    // format data
-                    let users: Array<any> = [];
-                    data.forEach(d => {
-                        let name: Array<any> = [];
-                        if (d.Name !== undefined) name = d.Name.split(',');
-                        let firstName: string = name[1];
-                        let lastName: string = name[0]; 
-                        if (firstName !== undefined) firstName = firstName.trim();
-                        if (lastName !== undefined) lastName = lastName.trim();
-
-                        users.push({
-                            Id: d.EmplId,
-                            FirstName: firstName || 'Vacant',
-                            LastName: lastName,
-                            District: d.District,
-                            ComplexArea: d.ComplexArea,
-                            Complex: d.Complex,
-                            Section: d.Section,
-                            SectionId: d.SectionId,
-                            Position: d.Posn
-                        });
+                Auth.methods.Auth_AcquireMSGraphToken()
+                    .then((token: string) => {
+                        Auth.methods.Auth_GetUserProfileExtended(token)
+                            .then((profile: any) => resolve(profile))
+                            .catch((error: Error) => reject(error))
                     })
-
-                    resolve(users);
-                }, 2500);
+                    .catch((error: Error) => reject(error));
             });
         }
 
-        QuerySections(): Promise<Array<Object>> {
+        QueryPeople(userProfile: any): Promise<Array<IUser>> {
+            // console.log(userProfile);
+
             return new Promise((resolve, reject) => {
-                if (sessionStorage.getItem('sections-loaded') === null) {
-                    // Fake data - Run real query here (may want to filter sections for specific office?)
+                if (this.DEBUG) {
+                    console.log('DEBUG: Using mock data (users)');
+                    let users: Array<any> = require('@/../data/users.ts').default;
+
                     setTimeout(() => {
-                        sessionStorage.setItem('sections-loaded', 'true');
-                        // filter depending on office
-                        const results: Array<Object> = sections;
-                        resolve(results);
-                    }, 1000);
+                        users = users.filter((user: any) => user.schoolId.includes('021Q'));
+                        users.forEach((user: any) => {
+                            const names: Array<string> = user.name.split(',');
+                            const firstName: string = names[1].trim();
+                            const lastName: string = names[0].trim();
+                            user["firstName"] = firstName;
+                            user["lastName"] = lastName;
+                        })
+                        resolve(users);
+                    }, 2500);
                 }
-                else resolve(this.sections);
+                else {
+                    let formData: FormData = new FormData();
+                    formData.append('SearchParam', userProfile.officeLocation);
+
+                    fetch('https://localhost:44352/api/users', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error));
+                }
             });
         }
 
-        Add(): void {
-            this.StartEdit();
+        APIFail(error: Error): void {
+            console.log(`ERROR: ${ error }`);
+
+            this.loading = false;
+            this.apiFail = true;
         }
 
-        Edit(result: IUser, index: number): void {
+        Edit(result: Object): void {
             this.selectedResult = result;
-            this.selectedResult['index'] = index;
-            this.StartEdit();
-        }
-
-        StartEdit(): void {
             this.editing = true;
 
             // disable navigation & edit buttons

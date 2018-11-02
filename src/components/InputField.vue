@@ -23,13 +23,16 @@
 <script lang="ts">
     import { Vue, Component, Prop } from "vue-property-decorator";
     import FPhoneNumber from "@/filters/PhoneNumber.ts";
+    import FNumber from "@/filters/Number.ts";
 
     @Component({
         components: {
-            FPhoneNumber
+            FPhoneNumber,
+            FNumber
         },
         filters: {
-            'FPhoneNumber': FPhoneNumber
+            'FPhoneNumber': FPhoneNumber,
+            'FNumber': FNumber
         }
     })
     export default class InputField extends Vue {
@@ -46,11 +49,21 @@
             if (this.value !== undefined) this.vModel = this.value;
         }
 
+        // Used for extra formatting when focused
         FocusChange(state: boolean): void {
             switch(this.type) {
                 case 'phone': {
                     // add/remove phone# formatting
                     this.vModel = FPhoneNumber(this.vModel, state);
+                    break;
+                }
+
+                case 'phone-extension': {
+                    this.vModel = FNumber(this.vModel, 5);
+                    break;
+                }
+
+                default: {
                     break;
                 }
             }
@@ -60,6 +73,11 @@
             switch(this.type) {
                 case 'phone': {
                     this.$emit('inputChange', FPhoneNumber(this.vModel, true));
+                    break;
+                }
+
+                case 'phone-extension': {
+                    this.$emit('inputChange', FNumber(this.vModel, 5));
                     break;
                 }
 
