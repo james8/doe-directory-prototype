@@ -123,14 +123,22 @@
                     setTimeout(() => {
                         searchParams.split(/[\s,]+/).forEach(param => {
                             users = users.filter((user: any) => 
-                                user.District.toLowerCase().includes(param)
-                                || user.ComplexArea.toLowerCase().includes(param)
-                                || user.Complex.toLowerCase().includes(param)
-                                || user.School.toLowerCase().includes(param)
-                                || user.Posn.toLowerCase().includes(param)
-                                || user.Name.toLowerCase().includes(param)
-                                || user.Alias.toLowerCase().includes(param)
+                                user.district.toLowerCase().includes(param)
+                                || user.complexArea.toLowerCase().includes(param)
+                                || user.complex.toLowerCase().includes(param)
+                                || user.school.toLowerCase().includes(param)
+                                || user.posn.toLowerCase().includes(param)
+                                || user.name.toLowerCase().includes(param)
+                                || user.alias.toLowerCase().includes(param)
                             );
+
+                            users.forEach((user: any) => {
+                                const names: Array<string> = user.name.split(',');
+                                const firstName: string = names[1].trim();
+                                const lastName: string = names[0].trim();
+                                user["firstName"] = firstName;
+                                user["lastName"] = lastName;
+                            });
                         });
                         resolve(users);
                     }, 3000);
