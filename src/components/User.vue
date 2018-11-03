@@ -7,7 +7,7 @@
     <div id="user">
         <div>
             <span class="title">{{ title }}</span>
-            <UserInfo v-for="(item, index) in info" :key="index" :userInfo="item"></UserInfo>
+            <UserInfo v-for="(item, index) in info" :key="index" :label="item.key" :value="item.value" :link="item.link" :longVal="item.longVal"></UserInfo>
         </div>
     </div>
 </template>
@@ -42,9 +42,9 @@
                         { key: 'Island', value: user.Island },
                         { key: 'Principal', value: `${ user.PrincipalFirstName } ${ user.PrincipalLastName }` },
                         { key: 'Address', value: user.Address },
-                        { key: 'Phone', value: FPhoneNumber(user.Phone) },
-                        { key: 'Fax', value: FPhoneNumber(user.Fax) },
-                        { key: 'Site', value: user.Site, longVal: true }
+                        { key: 'Phone', value: FPhoneNumber(user.Phone), link: { type: 'phone' } },
+                        { key: 'Fax', value: FPhoneNumber(user.Fax), link: { type: 'phone' } },
+                        { key: 'Site', value: user.Site, link: { type: 'site' }, longVal: true }
                     ];
                     break;
                 }
@@ -60,12 +60,15 @@
                     if (user.complex !== user.school)
                         this.info.push({ key: (isSchool ? 'School' : 'Sub-Section'), value: user.school });
                     this.info.push({ key: 'Position', value: user.posn });
-                    if (user.phone !== '')
-                        this.info.push({ key: 'Phone', value: ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext. ${ user.extension }`) });
-                    if (user.fax !== '')
-                        this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
+                    if (user.phone !== '') {
+                        const phoneLabel: string = ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext. ${ user.extension }`);
+                        const phoneValue: string = ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) }, ${ user.extension }`);
+                        this.info.push({ key: 'Phone', value: phoneValue, link: { type: 'phone', label: phoneLabel } });
+                    }
+                    if (user.fax !== '') 
+                        this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax), link: { type: 'phone' } });
                     if (user.cellular !== '')
-                        this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular) });
+                        this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular), link: { type: 'site' } });
 
                     break;
                 }
@@ -73,10 +76,10 @@
                 case 'frequently-called': {
                     this.title = user.Title;
                     this.info = [
-                        { key: 'Phone', value: FPhoneNumber(user.Phone) },
-                        { key: 'Phone 2', value: FPhoneNumber(user.Phone2) },
-                        { key: 'Email', value: user.Email, longVal: true },
-                        { key: 'Site', value: user.Site, longVal: true },
+                        { key: 'Phone', value: FPhoneNumber(user.Phone), link: { type: 'phone' } },
+                        { key: 'Phone 2', value: FPhoneNumber(user.Phone2), link: { type: 'phone' } },
+                        { key: 'Email', value: user.Email, link: { type: 'email' }, longVal: true },
+                        { key: 'Site', value: user.Site, link: { type: 'site' }, longVal: true },
                         { key: 'Modified', value: user.Modified, longVal: true }
                     ];
                     break;
@@ -93,8 +96,10 @@
                     if (user.complex !== user.school)
                         this.info.push({ key: (isSchool ? 'School' : 'Sub-Section'), value: user.school });
                     this.info.push({ key: 'Position', value: user.posn });
-                    if (user.phone !== '')
-                        this.info.push({ key: 'Phone', value: ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext. ${ user.extension }`) });
+                    if (user.phone !== '') {
+                        const phone: string = ((user.extension === '') ? FPhoneNumber(user.phone) : `${ FPhoneNumber(user.phone) } ext. ${ user.extension }`);
+                        this.info.push({ key: 'Phone', value: phone });
+                    }
                     if (user.fax !== '')
                         this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
                     if (user.cellular !== '')
