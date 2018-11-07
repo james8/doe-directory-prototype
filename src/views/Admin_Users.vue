@@ -44,48 +44,43 @@
             <User :user="user" :type="'edit-user'"></User>
         </div>
 
-        <Loader :label="'Loading...'" :display="loading"></Loader>
+        <loader :label="'Loading...'" :display="loading"></loader>
         <div v-if="apiFail">
             Request failed. Please try again later.
             <br/><br/>
         </div>
 
-        <UsersEdit v-if="editing" :result="selectedResult" @returnedFormData="ReturnedFormData($event);"></UsersEdit>
+        <toast v-if="showToast" :type="'success'" @closeToast="showToast = $event;"></toast>
+        <button type="button" @click="showToast = true;">Show Toast</button>
+
+        <users-edit v-if="editing" :user="selectedResult" @returnedFormData="ReturnedFormData($event);"></users-edit>
     </div>
 </template>
 
 <script lang="ts">
     import { Vue, Component } from "vue-property-decorator";
     import Auth from "@/mixins/Auth.ts";
-    import FPhoneNumber from "@/filters/PhoneNumber.ts";
+
     import FDateTime2 from "@/filters/DateTime2.ts";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
+
+    import IUser from "@/interfaces/IUser.ts";
+
+    import Toast from "@/components/Toast.vue";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
 
-    interface IUser {
-        FirstName: string;
-        LastName: string;
-        Office: string;
-        Section: string;
-        Phone: string;
-        Ext?: string;
-        Fax?: string;
-        Cellular?: string;
-        StartDate?: string;
-        EndDate?: string;
-        Modified: string;
-    }
-
     @Component({
         components: {
+            Toast,
             Loader,
             User,
             UsersEdit
         },
         filters: {
-            'FPhoneNumber': FPhoneNumber,
-            'FDateTime2': FDateTime2
+            'FDateTime2': FDateTime2,
+            'FPhoneNumber': FPhoneNumber
         },
         mixins: [
             Auth
@@ -99,6 +94,7 @@
         loading: boolean = true;
         apiFail: boolean = false;
         editing: boolean = false;
+        showToast: boolean = false;
 
         // DEBUG:
         formResults: any = {};

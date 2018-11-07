@@ -1,47 +1,54 @@
+<!--
+    @Prop user: IUser       -> User's information to populate Edit form
+
+    @Output SaveForm()      -> Saves updated information for User; Passes information to parent Component
+    @Output CancelForm()    -> Confirms if Cancel is desired; Passes null back to parent Component
+-->
+
 <template>
     <div class="form">
         <Backdrop></Backdrop>
-        <form id="user-form">
+        <form id="user-form" role="alertdialog">
             <header>{{ title }}</header>
             <div class="summary">
                 <span>Name:</span>
-                <span>{{ result.firstName }} {{ result.lastName }}</span>
+                <span>{{ user.firstName }} {{ user.lastName }}</span>
                 <span>District:</span>
-                <span>{{ result.district }}</span>
+                <span>{{ user.district }}</span>
                 <span>Complex Area:</span>
-                <span>{{ result.complexArea }}</span>
+                <span>{{ user.complexArea }}</span>
                 <span>Complex:</span>
-                <span>{{ result.complex }}</span>
+                <span>{{ user.complex }}</span>
                 <span>Section:</span>
-                <span>{{ result.school }} ({{ result.schoolId }})</span>
+                <span>{{ user.school }} ({{ user.schoolId }})</span>
                 <span>Title:</span>
-                <span>{{ result.posn }}</span>
+                <span>{{ user.posn }}</span>
             </div>
             <div class="summaryModified">
-                Modified By: {{ result.lastModifiedBy }} - {{ result.lastModified | FDateTime2 }}
+                Modified By: {{ user.lastModifiedBy }} - {{ user.lastModified | FDateTime2 }}
             </div>
 
             <InputField :id="'u-alias'"
                 :label="'Alias (first name only)'" :value="form.alias"
-                @inputChange="UpdateResult('alias', $event);"
+                @inputChange="UpdateUser('alias', $event);"
             ></InputField>
             <div class="phoneGroup">
                 <InputField :id="'u-phone'" :type="'phone'"
                     :label="'Phone'" :value="form.phone | FPhoneNumber"
-                    @inputChange="UpdateResult('phone', $event);"
+                    @inputChange="UpdateUser('phone', $event);"
                 ></InputField>
                 <InputField :id="'u-ext'" :type="'phone-extension'"
                     :label="'Ext'" :value="form.extension"
-                    @inputChange="UpdateResult('extension', $event);"
+                    @inputChange="UpdateUser('extension', $event);"
                 ></InputField>
             </div>
             <InputField :id="'u-fax'" :type="'phone'"
                 :label="'Fax'" :value="form.fax | FPhoneNumber"
-                @inputChange="UpdateResult('fax', $event);"
+                @inputChange="UpdateUser('fax', $event);"
             ></InputField>
             <InputField :id="'u-cellular'" :type="'phone'"
                 :label="'Cellular'" :value="form.cellular | FPhoneNumber"
-                @inputChange="UpdateResult('cellular', $event);"
+                @inputChange="UpdateUser('cellular', $event);"
             ></InputField>
 
             <div class="buttons">
@@ -62,6 +69,8 @@
     import Backdrop from "@/components/Backdrop.vue";
     import Loader from "@/components/Loader.vue";
 
+    import IUser from "@/interfaces/IUser.ts";
+
     @Component({
         components: {
             InputField,
@@ -74,7 +83,8 @@
         }
     })
     export default class UsersEdit extends Vue {
-        @Prop() result: any;
+        @Prop({ type: Object as (() => IUser) }) user!: IUser;
+        
         canSave: boolean = false;
         btnClass: string = "btnDisabled";
         saving: boolean = false;
@@ -83,7 +93,7 @@
         form: any = {};
 
         created(): void {
-            const r: any = this.result;
+            const r: any = this.user;
             this.title = ((r.alias === '') ? `${ r.firstName } ${ r.lastName }` : `${ r.alias } (${ r.firstName }) ${ r.lastName }`);
 
             // Cache form data (no way to prompt user of data loss if they refresh or navigate to another page)
@@ -109,8 +119,8 @@
             sessionStorage.removeItem('user.form');
         }
 
-        UpdateResult(key: string, event: any): void {
-            // this.result[key] = event;
+        UpdateUser(key: string, event: any): void {
+            // this.user[key] = event;
 
             this.form[key] = event;
             sessionStorage.setItem('user.form', JSON.stringify(this.form));
@@ -139,8 +149,10 @@
             // !!should save data here instead of passing back to parent
             // this.$emit('returnedFormData', 'mydata');
             setTimeout(() => {
+                console.log('saved data:', this.form);
+
                 this.saving = false;
-                this.$emit('returnedFormData', this.result);
+                this.$emit('returnedFormData', this.form);
             }, 2000);
         }
 
@@ -148,16 +160,10 @@
             const original: string = JSON.stringify(this.original);
             const form: string = JSON.stringify(this.form);
             const dirty: boolean = (original !== form);
+            let cancel: boolean = true;
 
-            if (dirty) {
-                if (confirm("Are you sure you want to close form? Any unsaved data will be lost.")) {
-                    const keys: Array<string> = Object.keys(this.original);
-                    keys.forEach(key => (this.result[key] = this.original[key]));
-
-                    this.$emit('returnedFormData', null);
-                }
-            }
-            else this.$emit('returnedFormData', null);
+            if (dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
+            if (cancel) this.$emit('returnedFormData', null);
         }
     }
 </script>
