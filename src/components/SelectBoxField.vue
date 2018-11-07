@@ -1,7 +1,7 @@
 <!--
     @Prop id: string                -> ID given to select-box field
     @Prop label?: string            -> Value for label (optional)
-    @Prop options: Array<any>       -> Options used to populate select-box field
+    @Prop options: Array<Object>    -> Options used to populate select-box field
     @Prop selectorLabel: string     -> Field name to use for option's label
                                         (e.g. options = [{'Label':'a'},{'Label':'b'}]; selectorLabel = 'Label')
     @Prop selectorValue: string     -> Field name to use for option's value
@@ -10,7 +10,8 @@
     @Prop isDisabled?: boolean      -> Flag if select-box field is disabled/enabled (optional)
     @Prop isRequired?: boolean      -> Flag if select-box field is required (optional)
 
-    Output  -> Function called when select changed; Passes id & value of select field back to parent Component
+    @Output Changed(Event)
+        -> Function called when select changed; Passes id & value of select field back to parent Component
 -->
 
 <template>
@@ -33,14 +34,14 @@
 
     @Component
     export default class SelectBoxField extends Vue {
-        @Prop() id: any;
-        @Prop() label: any;
-        @Prop() options: any;
-        @Prop() selectorLabel: any;
-        @Prop() selectorValue: any;
-        @Prop() value: any;
-        @Prop() isDisabled: any;
-        @Prop() isRequired: any;
+        @Prop({ type: String, required: true }) id!: string;
+        @Prop({ type: String }) label!: string;
+        @Prop({ type: Array, required: true }) options!: Array<Object>;
+        @Prop({ type: String, required: true }) selectorLabel!: string;
+        @Prop({ type: String, required: true }) selectorValue!: string;
+        @Prop({ type: String }) value!: string;
+        @Prop({ type: Boolean }) isDisabled!: boolean;
+        @Prop({ type: Boolean }) isRequired!: boolean;
 
         Changed(event: Event): void {
             const returnObj: Object = {

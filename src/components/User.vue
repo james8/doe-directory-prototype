@@ -68,7 +68,7 @@
                     if (user.fax !== '') 
                         this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax), link: { type: 'phone' } });
                     if (user.cellular !== '')
-                        this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular), link: { type: 'site' } });
+                        this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular), link: { type: 'phone' } });
 
                     break;
                 }
@@ -104,7 +104,7 @@
                         this.info.push({ key: 'Fax', value: FPhoneNumber(user.fax) });
                     if (user.cellular !== '')
                         this.info.push({ key: 'Cellular', value: FPhoneNumber(user.cellular) });
-                    this.info.push({ key: 'Modified By', value: user.lastModifiedBy });
+                    this.info.push({ key: 'Modified By', value: user.lastModifiedBy || '' });
                     this.info.push({ key: 'Modified', value: FDateTime2(user.lastModified) });
 
                     break;

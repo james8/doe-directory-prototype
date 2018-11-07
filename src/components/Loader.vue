@@ -1,3 +1,8 @@
+<!--
+    @Prop label: string         -> Value for label
+    @Prop display: boolean	    -> Flag if should be displayed or not
+-->
+
 <template>
    <div id="loader" v-if="display">
         <span class="fas fa-cog fa-2x fa-spin"></span>
@@ -10,9 +15,8 @@
 
     @Component
     export default class Loader extends Vue {
-        // non-null assertion operator
-        @Prop({ required: true }) label!: string;
-        @Prop({ required: true }) display!: boolean;
+        @Prop({ type: String, required: true }) label!: string;
+        @Prop({ type: Boolean, required: true }) display!: boolean;
     }
 </script>
 

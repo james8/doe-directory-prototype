@@ -1,12 +1,12 @@
 <!--
-    @Prop label: string,	    -> Label to be displayed for User
-    @Prop value: string,        -> Value to be displayed for User
-    @Prop link?: Object         -> Options for links (e.g. hyperlinks or phone numbers)
+    @Prop label: string,	                    -> Label to be displayed for User
+    @Prop value: string,                        -> Value to be displayed for User
+    @Prop link?: Object                         -> Options for links (e.g. hyperlinks or phone numbers)
         {
-            type: string,       -> Type of link ('phone', 'site', 'email')
-            label?: string      -> Label to be used for link (specifically for hyperlinks); @Prop(value) will be used for link value
+            type: 'phone' | 'site' | 'email,    -> Type of link
+            label?: string                      -> Label to be used for link (specifically for hyperlinks); @Prop(value) will be used for link value
         }
-    @Prop longVal?: boolean	    -> Flag to signify if 'longVal' class is to be applied to Value (for word-wrapping)
+    @Prop longVal?: boolean	                    -> Flag to signify if 'longVal' class is to be applied to Value (for word-wrapping)
 -->
 
 <template>
@@ -15,13 +15,13 @@
         <!-- Special Record -->
         <span v-if="link !== undefined">
             <a v-if="link.type === 'phone'" v-bind:href="href">
-                {{ (link.label !== undefined) ? link.label : value }}
+                {{ ((link.label !== undefined) ? link.label : value) }}
             </a>
             <a v-if="link.type === 'site'" v-bind:class="longVal ? 'longVal' : ''" v-bind:href="href" target="_blank">
-                {{ (link.label !== undefined) ? link.label : value }}
+                {{ ((link.label !== undefined) ? link.label : value) }}
             </a>
             <a v-if="link.type === 'email'" v-bind:class="longVal ? 'longVal' : ''" v-bind:href="href">
-                {{ (link.label !== undefined) ? link.label : value }}
+                {{ ((link.label !== undefined) ? link.label : value) }}
             </a>
         </span>
         <!-- Normal Record -->
@@ -33,33 +33,29 @@
     import { Vue, Component, Prop } from "vue-property-decorator";
 
     interface ILink {
-        type: string,
+        type: 'phone' | 'site' | 'email',
         label?: string
     };
 
     @Component
     export default class UserInfo extends Vue {
-        @Prop(String) label!: string;
-        @Prop(String) value!: string;
-        @Prop(Object) link!: object;
-        @Prop(Boolean) longVal!: boolean;
+        @Prop({ type: String, required: true }) label!: string;
+        @Prop({ type: String, required: true }) value!: string;
+        @Prop({ type: Object as (() => ILink) }) link!: ILink;
+        @Prop({ type: Boolean }) longVal!: boolean;
 
         href!: string;
 
         created(): void {
-            // Validate @Props
-            if (this.label === undefined) throw Error("UserInfo Component: Missing required property 'label'.");
-            if (this.value === undefined) throw Error("UserInfo Component: Missing required property 'value'.");
-            if (this.link !== undefined) {
-                const link: ILink = this.link as ILink;
-
-                if (link.type === undefined) throw Error("UserInfo Component: Missing required attribute 'type' for property 'link'.\nlink = { type: string, label?: string }");
-                else {
-                    if (typeof(link.type) !== 'string') throw Error(`UserInfo Component: Invalid prop: type check for prop 'link.type'.\nExpected string, received ${ typeof(link.type) }.`);
-                    if ((link.type !== 'phone') && (link.type !== 'site') && (link.type !== 'email')) throw Error(`UserInfo Component: Invalid prop: value check for prop 'link.type'.\nExpected ['phone', 'site', 'email'], received ${ link.type }.`);
-                }
-
-                if ((link.label !== undefined) && (typeof(link.label) !== 'string')) throw Error(`UserInfo Component: Invalid prop: type check for prop 'link.label'.\nExpected string, received ${ typeof(link.label) }.`);
+            // Validate ILink (Prop type checking doesnt work for interfaces)
+            const link: ILink = this.link;
+            if (link !== undefined) {
+                if (link.type === undefined) throw Error('Missing required prop for ILink: "type"');
+                else if ((link.type !== 'phone') && (link.type !== 'site') && (link.type !== 'email'))
+                    throw Error(`Invalid prop for ILink: value check failed for prop "type".\nExpected ['phone', 'site', or 'email'], got '${ link.type }'.`);
+                    
+                if ((link.label !== undefined) && (typeof(link.label) !== 'string'))
+                    throw Error(`Invalid prop for ILink: type check failed for prop "label".\nExpected String, got ${ typeof(link.label) }.`);
             }
 
             // Configure href value if needed

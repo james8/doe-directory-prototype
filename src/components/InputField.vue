@@ -7,7 +7,8 @@
     @Prop isDisabled?: boolean  -> Flag if input field is disabled/enabled (optional)
     @Prop isRequired?: boolean  -> Flag if input field is required (optional)
 
-    @input  -> Function called whenever input field changes; Passes value of input field back to parent Component
+    @Output Changed(Event)
+        -> Function called whenever input field changes; Passes value of input field back to parent Component
 -->
 
 <template>
@@ -36,16 +37,18 @@
         }
     })
     export default class InputField extends Vue {
-        @Prop() id: any;
-        @Prop() type: any;
-        @Prop() label: any;
-        @Prop() value: any;
-        @Prop() placeHolder: any;
-        @Prop() isDisabled: any;
-        @Prop() isRequired: any;
+        @Prop({ type: String, required: true }) id!: string;
+        @Prop({ type: String }) type!: string;
+        @Prop({ type: String }) label!: string;
+        @Prop({ type: String }) value!: string;
+        @Prop({ type: String }) placeHolder!: string;
+        @Prop({ type: Boolean }) isDisabled!: boolean;
+        @Prop({ type: Boolean }) isRequired!: boolean;
+
         vModel: string = "";
 
         created(): void {
+            // Set Input value if provided
             if (this.value !== undefined) this.vModel = this.value;
         }
 
