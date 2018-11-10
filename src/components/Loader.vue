@@ -4,7 +4,7 @@
 -->
 
 <template>
-   <div id="loader" v-if="display">
+   <div id="loader" v-if="display" role="alert" >
         <span class="fas fa-cog fa-2x fa-spin"></span>
         <span class="text">{{ label }}</span>
     </div> 

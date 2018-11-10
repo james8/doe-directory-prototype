@@ -1,14 +1,13 @@
 <!--
     @Prop type: string          -> Type of Toast ['normal', 'success', 'error']
+    @Prop msg: string           -> Message displayed
     @Prop showFor?: number      -> Time (ms) Toast is shown for
 
     @Output closeToast()        -> Hides Toast after 'showFor' time; Passes 'false' to remove Toast.vue from DOM
 -->
 
 <template>
-    <div id="toast" role="alert" class="slideIn" v-bind:class="`${ type }Toast`">
-        hello world!!
-    </div>
+    <div id="toast" role="alert" class="slideIn" v-bind:class="`${ type }Toast`">{{ msg }}</div>
 </template>
 
 <script lang="ts">
@@ -18,6 +17,7 @@ import { setTimeout } from 'timers';
     @Component
     export default class Toast extends Vue {
         @Prop({ type: String, required: true }) type!: 'normal' | 'success' | 'error';
+        @Prop({ type: String, required: true }) msg!: string;
         @Prop({ type: Number }) showFor!: number;
 
         time: number = (this.showFor !== undefined) ? this.showFor : 2000;

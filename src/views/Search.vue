@@ -1,12 +1,12 @@
 <template>
     <div id="search">
-        <span class="title">{{ title }}</span>
-        <advanced-search-options @advancedSearchString="ReturnedSearchOptions($event);"></advanced-search-options>
+        <header class="title">{{ title }}</header>
+        <advanced-search-options @advancedSearchString="ReturnedSearchOptions($event);" tabindex="-1"></advanced-search-options>
         <search-box :advancedOptions="advancedSearchString" @returnedSearchResults="ReturnedSearchResults($event);"></search-box>
         
         <div class="separator"></div>
 
-        <User v-for="(result, index) in results.queryResults" :key="index" :user="result" :type="(result.emplId === undefined) ? 'school' : 'office'"></User>
+        <user v-for="(result, index) in results.queryResults" :key="index" :index="index" :user="result" :type="(result.emplId === undefined) ? 'school' : 'office'"></user>
         <p v-if="(results.queryResults !== undefined) && (results.queryResults.length === 0)">{{ noResults }}</p>
     </div>
 </template>
@@ -25,13 +25,17 @@
         }
     })
     export default class Search extends Vue {
-        title: string = "Directory";
+        title: string = "Search";
         
         advancedSearchString: string = "";
 
         // search
         noResults: string = "No results found. Please try a different search.";
         results: Object = {};
+
+        created(): void {
+            // setTimeout(() => { (document.getElementById('advanced-search-options') as HTMLElement).focus(); }, 50);
+        }
 
         ReturnedSearchOptions(event: string): void {
             this.advancedSearchString = event;

@@ -1,5 +1,5 @@
 <template>
-    <div id="NavigationTabs" @keyup="CloseMobileMenu($event);">
+    <div id="navigation-tabs" @keyup="CloseMobileMenu($event);">
         <ul class="menu normalMenu" role="menu">
             <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
                 <router-link :to="route.path">{{ route.name }}</router-link>
@@ -18,19 +18,19 @@
         </ul>
 
         <div class="menu mobileMenu">
-            <button type="button" class="menuToggle fas fa-bars" @click="OpenMobileMenu();"></button>
-            <ul role="menu" v-bind:class="cssMenuClass" aria-hidden="true" inert>
-                <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
+            <button type="button" class="menuToggle fas fa-bars" aria-label="open menu" @click="OpenMobileMenu();"></button>
+            <ul role="menu" v-bind:class="cssMenuClass">
+                <li role="menuitem" class="menuItem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')" inert>
                     <router-link :to="route.path" @click.native="CloseMobileMenu();">{{ route.name }}</router-link>
                 </li>
-                <li class="portal menuItem" role="menuitem" v-if="!Auth_IsAuthenticated()">
+                <li role="menuitem" class="portal menuItem" v-if="!Auth_IsAuthenticated()" inert>
                     <button type="button" @click="Auth_Login()">Sign In</button>
                 </li>
                 <div class="portal" v-if="Auth_IsAuthenticated()">
-                    <li class="menuItem" role="menuitem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal">
+                    <li role="menuitem" class="menuItem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal" inert>
                         <button type="button" @click="ChangePortal(portalTab.route); CloseMobileMenu();">{{ portalTab.title }}</button>
                     </li>
-                    <li class="menuItem" role="menuitem">
+                    <li role="menuitem" class="menuItem" inert>
                         <button type="button" @click="Auth_Logout()">Sign Out</button>
                     </li>
                 </div>
@@ -95,8 +95,10 @@
         }
 
         ChangePortal(route: string): void {
-            this.$router.push(route);
-            this.portal = !this.portal;
+            // setTimeout(() => {
+                this.$router.push(route);
+                this.portal = !this.portal;
+            // }, 2000);
         }
 
         OpenMobileMenu(): void {
@@ -104,11 +106,14 @@
             this.cssMenuClass = 'menuOpen';
 
             // Trap focus in menu
-            // using elem.inert = true/false gives error 'does not exist'
             const attr: string = 'inert';
+            // Menu button
             (document.querySelector('.mobileMenu button') as HTMLInputElement).setAttribute(attr, '');
-            (document.querySelector('#NavigationTabs ~ div') as HTMLInputElement).setAttribute(attr, '');
-            (document.querySelector('.mobileMenu ul') as HTMLInputElement).removeAttribute(attr);
+            // Menu tabs
+            const navElems: NodeListOf<Element> = document.querySelectorAll('.mobileMenu ul li');
+            navElems.forEach(navElem => navElem.removeAttribute(attr));
+            // Body content
+            (document.querySelector('#navigation-tabs ~ div') as HTMLInputElement).setAttribute(attr, '');
 
             // Set focus to current tab or first available tab (if 404)
             setTimeout(() => {
@@ -117,15 +122,19 @@
             }, 50);
         }
 
-        CloseMobileMenu(event: KeyboardEvent): void {
+        CloseMobileMenu(event?: KeyboardEvent): void {
             if ((event === undefined) || (event.key === 'Escape')) {
                 // Un-trap focus
                 const attr: string = 'inert';
+                // Menu button
                 const button: HTMLInputElement = document.querySelector('.mobileMenu button') as HTMLInputElement;
                 button.removeAttribute(attr);
                 button.focus();
-                (document.querySelector('#NavigationTabs ~ div') as HTMLInputElement).removeAttribute(attr);
-                (document.querySelector('.mobileMenu ul') as HTMLInputElement).setAttribute(attr, '');
+                // Menu tabs
+                const navElems: NodeListOf<Element> = document.querySelectorAll('.mobileMenu ul li');
+                navElems.forEach(navElem => navElem.setAttribute(attr, ''));
+                // body content
+                (document.querySelector('#navigation-tabs ~ div') as HTMLInputElement).removeAttribute(attr);
 
                 // Close menu
                 this.cssMenuClass = "";

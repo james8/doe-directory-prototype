@@ -1,5 +1,6 @@
 <template>
-    <div id="admin-users" v-if="Auth_IsAuthenticated() || DEBUG">
+    <div id="admin-users" v-if="Auth_IsAuthenticated() || DEBUG" tabindex="-1">
+        <br/>
         <table id="users" cellspacing="0" width="100%">
             <caption>User Information</caption>
             <thead>
@@ -25,7 +26,7 @@
                     <td>
                         {{ user.school }}
                         <br><br>
-                        {{ user.position }}
+                        {{ user.posn }}
                     </td>
                     <td>{{ user.phone | FPhoneNumber }}</td>
                     <td>{{ user.extension }}</td>
@@ -39,7 +40,7 @@
         <div id="users-mobile-view" v-for="(user, index) in users" :key="index">
             <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(user);">
                 Edit
-                <span class="hidden">{{ user.firstName }} {{ user.lastName }}</span>
+                <span class="hidden">{{ user.alias || user.firstName }} {{ user.lastName }}</span>
             </button>
             <User :user="user" :type="'edit-user'"></User>
         </div>
@@ -49,9 +50,6 @@
             Request failed. Please try again later.
             <br/><br/>
         </div>
-
-        <toast v-if="showToast" :type="'success'" @closeToast="showToast = $event;"></toast>
-        <button type="button" @click="showToast = true;">Show Toast</button>
 
         <users-edit v-if="editing" :user="selectedResult" @returnedFormData="ReturnedFormData($event);"></users-edit>
     </div>
@@ -66,14 +64,12 @@
 
     import IUser from "@/interfaces/IUser.ts";
 
-    import Toast from "@/components/Toast.vue";
     import Loader from "@/components/Loader.vue";
     import User from "@/components/User.vue";
     import UsersEdit from "@/components/UsersEdit.vue";
 
     @Component({
         components: {
-            Toast,
             Loader,
             User,
             UsersEdit
@@ -94,10 +90,9 @@
         loading: boolean = true;
         apiFail: boolean = false;
         editing: boolean = false;
-        showToast: boolean = false;
 
         // DEBUG:
-        formResults: any = {};
+        // formResults: any = {};
 
         created(): void {
             if (Auth.methods.Auth_IsAuthenticated() || this.DEBUG) {
@@ -117,6 +112,13 @@
                         .then((results: Array<any>) => {
                             this.loading = false;
                             this.users = results[0];
+
+                            // set focus on Component
+                            const display = getComputedStyle(document.getElementById('users') as HTMLElement).display;
+                            setTimeout(() => {
+                                if (display === 'table') (document.getElementById('admin-users') as HTMLElement).focus();
+                                else (document.querySelector('#users-mobile-view button') as HTMLElement).focus();
+                            }, 50);
                         })
                         .catch((error: Error) => this.APIFail(error))
                 })
@@ -181,9 +183,10 @@
             this.editing = true;
 
             // disable navigation & edit buttons
-            const elems: NodeListOf<Element> = document.querySelectorAll('.resultIcon button');
+            const navElems: NodeListOf<Element> = document.querySelectorAll('navigation-tabs');
+            const elems: NodeListOf<Element> = document.querySelectorAll('#admin-users button');
+            // navElems.forEach(navElem => (navElem.setAttribute('inert', '')));
             elems.forEach(elem => (elem.setAttribute('inert', '')));
-            (document.getElementById('NavigationTabs') as HTMLInputElement).setAttribute('inert', '');
         }
 
         ReturnedFormData(event: any): void {
@@ -191,9 +194,14 @@
             this.loading = true;
             this.users = [];
             this.selectedResult = {};
-            (document.getElementById('NavigationTabs') as HTMLInputElement).removeAttribute('inert');
 
-            this.formResults = event;
+            // enable navigation & edit buttons
+            const navElems: NodeListOf<Element> = document.querySelectorAll('navigation-tabs');
+            const elems: NodeListOf<Element> = document.querySelectorAll('#admin-users button');
+            // navElems.forEach(navElem => (navElem.removeAttribute('inert')));
+            elems.forEach(elem => (elem.removeAttribute('inert')));
+
+            // this.formResults = event;
 
             this.Load();
         }

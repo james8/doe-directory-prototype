@@ -4,11 +4,12 @@
             <legend>Advanced Search</legend>
             <div class="modalTip">Apply one or more filter(s) to help narrow down your search</div>
             <br/>
-            <div v-if="initializingAdvanced" class="advancedLoader"><span class="fas fa-cog fa-2x fa-spin"></span></div>
-            <div v-else>
+            <loader :label="'Advanced Search Initializing...'" :display="initializingAdvanced"></loader>
+            <!-- <div v-if="initializingAdvanced" class="advancedLoader"><span class="fas fa-cog fa-2x fa-spin"></span></div> -->
+            <div v-if="!initializingAdvanced">
                 <div class="searchOption">
-                    <label for="search-category">Filter by</label>
-                    <radio-field :id="'search-category'" :noFieldset="true" :buttons="radioBtns" @inputChange="ReturnedRadioFieldChange($event);"></radio-field>
+                    <label id="search-category-label" for="search-category">{{ searchCategoryLabel }}</label>
+                    <radio-field :id="'search-category'" :ariaLabelledById="'search-category-label'" :noFieldset="true" :legend="searchCategoryLabel" :buttons="radioBtns" @inputChange="ReturnedRadioFieldChange($event);"></radio-field>
                 </div>
                 <!-- School -->
                 <div v-if="selectedRadioBtn === 0">
@@ -66,6 +67,7 @@
 
 <script lang="ts">
     import { Vue, Component } from "vue-property-decorator";
+    import Loader from "@/components/Loader.vue";
     import RadioField from "@/components/RadioField.vue";
     import SelectBoxField from "@/components/SelectBoxField.vue";
 
@@ -105,6 +107,7 @@
 
     @Component({
         components: {
+            Loader,
             RadioField,
             SelectBoxField
         }
@@ -113,6 +116,7 @@
         initializingAdvanced: boolean = true;
         advancedSearchOptions: AdvancedSearchOption = new AdvancedSearchOption();
         advancedSearchString: string = "";
+        searchCategoryLabel: string = "Filter by";
         radioBtns: Array<Object> = [];
         selectedRadioBtn: Number = -1;
         districts: Array<Object> = [];
@@ -143,6 +147,7 @@
                     this.schools = results[3];
                     this.positions = results[4];
                     this.initializingAdvanced = false;
+                    setTimeout(() => { (document.getElementById('advanced-search-options') as HTMLElement).focus(); }, 50);
                 });
         }
         
@@ -210,7 +215,9 @@
             radioBtns.forEach((btn: HTMLInputElement) => (btn.checked = false));
             this.advancedSearchOptions = new AdvancedSearchOption();
 
-            this.$emit('advancedSearchString', '');
+            setTimeout(() => { (document.querySelector('#search-category input') as HTMLElement).focus(); }, 50);
+            
+            this.$emit('advancedSearchClear', '');
         }
     }
 </script>

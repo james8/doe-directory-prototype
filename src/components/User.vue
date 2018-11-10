@@ -4,12 +4,12 @@
 -->
 
 <template>
-    <div id="user">
+    <section :aria-labelledby="`region${ index }`" id="user">
         <div>
-            <span class="title">{{ title }}</span>
-            <UserInfo v-for="(item, index) in info" :key="index" :label="item.key" :value="item.value" :link="item.link" :longVal="item.longVal"></UserInfo>
+            <span :id="`region${ index }`" class="title">{{ title }}</span>
+            <user-info v-for="(item, index) in info" :key="index" :label="item.key" :value="item.value" :link="item.link" :longVal="item.longVal"></user-info>
         </div>
-    </div>
+    </section>
 </template>
 
 <script lang="ts">
@@ -26,6 +26,7 @@
         }
     })
     export default class User extends Vue {
+        @Prop() index: any;
         @Prop() user: any;
         @Prop() type: any;
         title: string = "";

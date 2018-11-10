@@ -1,11 +1,12 @@
 <!--
-    @Prop id: string                -> ID given to fieldset
-    @Prop noFieldset?: boolean      -> Flag if radio buttons wrapped in a fieldset (optional)
-    @Prop legend?: string	        -> Label for legend (optional)
-    @Prop flow?: boolean            -> Flag if radio buttons aligned horizontally (optional)
-    @Prop isDisabled?: boolean      -> Flag if radio buttons disabled/enabled (optional)
-    @Prop isRequired?: boolean      -> Flag if radio field required (optional)
-    @Prop buttons: Array<Object>    ->
+    @Prop id: string                    -> ID given to fieldset
+    @Prop ariaLabelledById?: string     -> ID used for aria-labelledby 
+    @Prop noFieldset?: boolean          -> Flag if radio buttons wrapped in a fieldset (optional)
+    @Prop legend: string	            -> Label for legend
+    @Prop flow?: boolean                -> Flag if radio buttons aligned horizontally (optional)
+    @Prop isDisabled?: boolean          -> Flag if radio buttons disabled/enabled (optional)
+    @Prop isRequired?: boolean          -> Flag if radio field required (optional)
+    @Prop buttons: Array<IButtons>      -> Array of radio buttons
         {
             key: string,
             value: string,
@@ -14,15 +15,15 @@
 -->
 
 <template>
-    <fieldset :id="id" v-bind:class="noFieldset ? 'hideFieldset' : ''">
-        <legend v-bind:class="noFieldset ? 'hideLegend' : ''">{{ legend }}</legend>
+    <div :id="id" class="radioGroup" v-bind:class="noFieldset ? 'hideFieldset' : ''" role="radiogroup" :aria-labelledby="(ariaLabelledById === undefined) ? 'radio-legend' : ariaLabelledById">
+        <legend id="radio-legend" v-bind:class="noFieldset ? 'hideLegend' : ''">{{ legend }}</legend>
         <div class="wrapper" v-bind:class="flow ? 'flowH' : 'flowV'">
             <div v-for="(button, index) in buttons" :key="index">
-                <input type="radio" :id="`radio-${ button.key }`" :name="id" :value="button.key" :checked="button.checked" :disabled="isDisabled" :required="isRequired" @change="Changed($event)" />
+                <input type="radio" :id="`radio-${ button.key }`" :name="id" :value="button.key" :checked="button.checked" :disabled="isDisabled" :required="isRequired" @change="Changed($event)" role="radio" />
                 <label :for="`radio-${ button.key }`">{{ button.value }}</label>
             </div>
         </div>
-    </fieldset>
+    </div>
 </template>
 
 <script lang="ts">
@@ -37,8 +38,9 @@
     @Component
     export default class RadioField extends Vue {
         @Prop({ type: String, required: true }) id!: string;
+        @Prop({ type: String }) ariaLabelledById!: string;
         @Prop({ type: Boolean }) noFieldset!: boolean;
-        @Prop({ type: String }) legend!: string;
+        @Prop({ type: String, required: true }) legend!: string;
         @Prop({ type: Boolean }) flow!: boolean;
         @Prop({ type: Boolean }) isDisabled!: boolean;
         @Prop({ type: Boolean }) isRequired!: boolean;
@@ -69,7 +71,7 @@
 </script>
 
 <style scoped>
-    fieldset {
+    .radioGroup {
         border-radius: 5px;
         /* margin: 24px; */
         padding: 5px 12px;

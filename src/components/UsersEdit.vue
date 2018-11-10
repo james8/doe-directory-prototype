@@ -6,9 +6,11 @@
 -->
 
 <template>
-    <div class="form">
-        <Backdrop></Backdrop>
-        <form id="user-form" role="alertdialog">
+    <div id="users-edit" class="form">
+        <backdrop></backdrop>
+        <toast v-if="showToast" :type="toastType" :msg="toastMsg" @closeToast="showToast = $event"></toast>
+        
+        <form id="user-form" role="dialog" tabindex="-1">
             <header>{{ title }}</header>
             <div class="summary">
                 <span>Name:</span>
@@ -52,47 +54,60 @@
             ></InputField>
 
             <div class="buttons">
-                <button type="button" class="btn btnSuccess" @click="SaveForm();" :disabled="!canSave" v-bind:class="btnClass">Save</button>
-                <button type="button" class="btn btnError" @click="CancelForm();">Cancel</button>
+                <button type="button" id="user-edit-save" class="btn btnSuccess" @click="SaveForm();" :disabled="!canSave" v-bind:class="btnClass">Save</button>
+                <button type="button" id="user-edit-cancel" class="btn btnError" @click="CancelForm();">{{ this.dirty ? 'Cancel' : 'Close' }}</button>
             </div>
 
-            <Loader :label="'Saving...'" :display="saving"></Loader>
+            <loader :aria-busy="saving" :label="'Saving...'" :display="saving"></loader>
         </form>
     </div>
 </template>
 
 <script lang="ts">
     import { Vue, Component, Prop } from "vue-property-decorator";
-    import FPhoneNumber from "@/filters/PhoneNumber.ts";
+
     import FDateTime2 from "@/filters/DateTime2.ts";
-    import InputField from "@/components/InputField.vue";
-    import Backdrop from "@/components/Backdrop.vue";
-    import Loader from "@/components/Loader.vue";
+    import FPhoneNumber from "@/filters/PhoneNumber.ts";
 
     import IUser from "@/interfaces/IUser.ts";
 
+    import Backdrop from "@/components/Backdrop.vue";
+    import InputField from "@/components/InputField.vue";
+    import Loader from "@/components/Loader.vue";
+    import Toast from "@/components/Toast.vue";
+
     @Component({
         components: {
-            InputField,
             Backdrop,
-            Loader
+            InputField,
+            Loader,
+            Toast
         },
         filters: {
-            'FPhoneNumber': FPhoneNumber,
-            'FDateTime2': FDateTime2
+            'FDateTime2': FDateTime2,
+            'FPhoneNumber': FPhoneNumber
         }
     })
     export default class UsersEdit extends Vue {
         @Prop({ type: Object as (() => IUser) }) user!: IUser;
         
+        dirty: boolean = false;
         canSave: boolean = false;
         btnClass: string = "btnDisabled";
         saving: boolean = false;
         title: string = "";
         original: any = {};
         form: any = {};
+        showToast: boolean = false;
+        toastType: string = "normal";
+        toastMsg: string = "Hello";
 
         created(): void {
+            // Set focus on 'header' for Screen Readers
+            setTimeout(() => {
+                (document.getElementById('user-form') as HTMLElement).focus();
+            }, 50);
+            
             const r: any = this.user;
             this.title = ((r.alias === '') ? `${ r.firstName } ${ r.lastName }` : `${ r.alias } (${ r.firstName }) ${ r.lastName }`);
 
@@ -132,6 +147,7 @@
             const f: Object = JSON.stringify(this.form);
             this.btnClass = ((o !== f) ? "" : "btnDisabled");
             this.canSave = (o !== f);
+            this.dirty = (o !== f);
         }
 
         SaveForm(): void {
@@ -140,6 +156,7 @@
             elems.forEach(elem => (elem.setAttribute('inert', '')));
             
             // save data
+            this.showToast = false;
             this.saving = true; 
             setTimeout(() => {
                 const loaderElem: HTMLElement = document.getElementById('loader') as HTMLElement;
@@ -147,22 +164,26 @@
             }, 15); 
 
             // !!should save data here instead of passing back to parent
-            // this.$emit('returnedFormData', 'mydata');
             setTimeout(() => {
                 console.log('saved data:', this.form);
 
+                const savedData = this.form;
                 this.saving = false;
-                this.$emit('returnedFormData', this.form);
+                this.toastType = 'success';
+                this.toastMsg = `User '${ savedData.alias || savedData.firstName } ${ savedData.lastName }' successfully updated`; 
+                this.showToast = true;
+
+                // reset form with updated data
+                this.original = savedData;
+                this.CheckIfCanSave();
+                elems.forEach(elem => (elem.removeAttribute('inert')));
+                setTimeout(() => { (document.getElementById('user-edit-cancel') as HTMLElement).focus(); }, 50);
             }, 2000);
         }
 
         CancelForm(): void {
-            const original: string = JSON.stringify(this.original);
-            const form: string = JSON.stringify(this.form);
-            const dirty: boolean = (original !== form);
             let cancel: boolean = true;
-
-            if (dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
+            if (this.dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
             if (cancel) this.$emit('returnedFormData', null);
         }
     }
