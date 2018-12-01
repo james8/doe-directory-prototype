@@ -63,11 +63,31 @@
         padding-left: 20px;
     }
 
+    .fakeLink {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .fakeLink:hover {
+        color: blue;
+    }
+
     table {
         border: 1px solid #000;
+        box-shadow: 5px 5px 4px gray;
         margin: 20px;
         table-layout: fixed;
         width: calc(100% - 40px);
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        /* vertical-align: top; */
+    }
+
+    th:last-of-type, td:last-of-type {
+        border-right: none;
     }
 
     th {
@@ -78,14 +98,8 @@
         font-weight: bold;
     }
 
-    th, td {
-        padding: 10px;
-        text-align: left;
-        vertical-align: top;
-    }
-
-    th:last-of-type, td:last-of-type {
-        border-right: none;
+    td {
+        border-right: 1px solid #cecece;
     }
 
     tbody tr:nth-child(even) {
@@ -137,6 +151,7 @@
         font-weight: bold;
         margin: 5px 10px;
         padding: 10px;
+        text-transform: uppercase;
     }
 
     .btnNormal {

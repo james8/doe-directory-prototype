@@ -1,15 +1,16 @@
 interface IUser {
-    FirstName: string;
-    LastName: string;
-    Office: string;
-    Section: string;
-    Phone: string;
-    Ext?: string;
-    Fax?: string;
-    Cellular?: string;
-    StartDate?: string;
-    EndDate?: string;
-    Modified: string;
+    firstName: string;
+    lastName: string;
+    alias?: string;
+    office: string;
+    section: string;
+    phone: string;
+    ext?: string;
+    fax?: string;
+    cellular?: string;
+    startDate?: string;
+    endDate?: string;
+    modified: string;
 }
 
 export default IUser;

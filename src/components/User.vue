@@ -6,7 +6,9 @@
 <template>
     <section :aria-labelledby="`region${ index }`" id="user">
         <div>
-            <span :id="`region${ index }`" class="title">{{ title }}</span>
+            <slot>
+                <span :id="`region${ index }`" class="title">{{ title }}</span>
+            </slot>
             <user-info v-for="(item, index) in info" :key="index" :label="item.key" :value="item.value" :link="item.link" :longVal="item.longVal"></user-info>
         </div>
     </section>
@@ -75,14 +77,31 @@
                 }
 
                 case 'frequently-called': {
-                    this.title = user.Title;
+                    this.title = user.title;
+
                     this.info = [
-                        { key: 'Phone', value: FPhoneNumber(user.Phone), link: { type: 'phone' } },
-                        { key: 'Phone 2', value: FPhoneNumber(user.Phone2), link: { type: 'phone' } },
-                        { key: 'Email', value: user.Email, link: { type: 'email' }, longVal: true },
-                        { key: 'Site', value: user.Site, link: { type: 'site' }, longVal: true },
-                        { key: 'Modified', value: user.Modified, longVal: true }
+                        { key: 'Phone', value: FPhoneNumber(user.phone), link: { type: 'phone' } },
+                        { key: 'Phone 2', value: FPhoneNumber(user.phone2), link: { type: 'phone' } },
+                        { key: 'Email', value: user.email, link: { type: 'email' }, longVal: true },
+                        { key: 'Site', value: user.site, link: { type: 'site' }, longVal: true },
+                        { key: 'Modified', value: user.modified, longVal: true }
                     ];
+                    break;
+                }
+
+                case 'edit-frequently-called': {
+                    this.title = user.title;
+
+                    this.info = [];
+                    this.info.push({ key: 'Contact', value: FPhoneNumber(user.contact) });
+                    if (user.phone2 !== '')
+                        this.info.push({ key: 'Contact 2', value: FPhoneNumber(user.contact2) });
+                    if (user.email !== '')
+                        this.info.push({ key: 'Email', value: user.email, longVal: true });
+                    if (user.site !== '')
+                        this.info.push({ key: 'Site', value: user.site, longVal: true });
+                    this.info.push({ key: 'Modified', value: user.modified, longVal: true });
+
                     break;
                 }
 
@@ -117,7 +136,7 @@
 
 <style scoped>
     #user {
-        border-bottom: 1px dotted #000;
+        border-top: 1px dotted #000;
     }
 
     #user > div {

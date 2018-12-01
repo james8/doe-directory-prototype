@@ -1,8 +1,9 @@
 <!--
-    @Prop user: IUser       -> User's information to populate Edit form
+    @Prop user: IUser           -> User's information to populate Edit form
+    @Prop editable: boolean     -> Flag if form is editable or not
 
-    @Output SaveForm()      -> Saves updated information for User; Passes information to parent Component
-    @Output CancelForm()    -> Confirms if Cancel is desired; Passes null back to parent Component
+    @Output SaveForm()          -> Saves updated information for User; Passes information to Parent Component
+    @Output CancelForm()        -> Confirms if Cancel is desired; Passes null back to Parent Component
 -->
 
 <template>
@@ -12,6 +13,7 @@
         
         <form id="user-form" role="dialog" tabindex="-1">
             <header>{{ title }}</header>
+
             <div class="summary">
                 <span>Name:</span>
                 <span>{{ user.firstName }} {{ user.lastName }}</span>
@@ -30,31 +32,35 @@
                 Modified By: {{ user.lastModifiedBy }} - {{ user.lastModified | FDateTime2 }}
             </div>
 
-            <InputField :id="'u-alias'"
-                :label="'Alias (first name only)'" :value="form.alias"
-                @inputChange="UpdateUser('alias', $event);"
-            ></InputField>
+            <input-field :id="'u-alias'"
+                :label="'Alias (first name only)'" :value="form.alias" :isDisabled="!canEdit"
+                @inputChange="UpdateUser('alias', $event);">
+            </input-field>
+
             <div class="phoneGroup">
-                <InputField :id="'u-phone'" :type="'phone'"
-                    :label="'Phone'" :value="form.phone | FPhoneNumber"
-                    @inputChange="UpdateUser('phone', $event);"
-                ></InputField>
-                <InputField :id="'u-ext'" :type="'phone-extension'"
-                    :label="'Ext'" :value="form.extension"
-                    @inputChange="UpdateUser('extension', $event);"
-                ></InputField>
+                <input-field :id="'u-phone'" :type="'phone'"
+                    :label="'Phone'" :value="form.phone | FPhoneNumber" :isDisabled="!canEdit"
+                    @inputChange="UpdateUser('phone', $event);">
+                </input-field>
+
+                <input-field :id="'u-ext'" :type="'phone-extension'"
+                    :label="'Ext'" :value="form.extension" :isDisabled="!canEdit"
+                    @inputChange="UpdateUser('extension', $event);">
+                </input-field>
             </div>
-            <InputField :id="'u-fax'" :type="'phone'"
-                :label="'Fax'" :value="form.fax | FPhoneNumber"
-                @inputChange="UpdateUser('fax', $event);"
-            ></InputField>
-            <InputField :id="'u-cellular'" :type="'phone'"
-                :label="'Cellular'" :value="form.cellular | FPhoneNumber"
-                @inputChange="UpdateUser('cellular', $event);"
-            ></InputField>
+
+            <input-field :id="'u-fax'" :type="'phone'"
+                :label="'Fax'" :value="form.fax | FPhoneNumber" :isDisabled="!canEdit"
+                @inputChange="UpdateUser('fax', $event);">
+            </input-field>
+
+            <input-field :id="'u-cellular'" :type="'phone'"
+                :label="'Cellular'" :value="form.cellular | FPhoneNumber" :isDisabled="!canEdit"
+                @inputChange="UpdateUser('cellular', $event);">
+            </input-field>
 
             <div class="buttons">
-                <button type="button" id="user-edit-save" class="btn btnSuccess" @click="SaveForm();" :disabled="!canSave" v-bind:class="btnClass">Save</button>
+                <button type="button" id="user-edit-save" class="btn btnSuccess" @click="SaveForm();" v-if="canEdit" :disabled="!canSave" v-bind:class="btnClass">Save</button>
                 <button type="button" id="user-edit-cancel" class="btn btnError" @click="CancelForm();">{{ this.dirty ? 'Cancel' : 'Close' }}</button>
             </div>
 
@@ -89,42 +95,51 @@
         }
     })
     export default class UsersEdit extends Vue {
-        @Prop({ type: Object as (() => IUser) }) user!: IUser;
+        @Prop({ type: Object as (() => IUser), required: true }) user!: IUser;
+        @Prop({ type: Boolean, required: true }) editable!: boolean;
         
-        dirty: boolean = false;
-        canSave: boolean = false;
-        btnClass: string = "btnDisabled";
-        saving: boolean = false;
         title: string = "";
+        btnClass: string = "btnDisabled";
+
         original: any = {};
         form: any = {};
+
+        canEdit: boolean = this.editable;
+        dirty: boolean = false;
+        canSave: boolean = false;
+        saving: boolean = false;
+
         showToast: boolean = false;
         toastType: string = "normal";
         toastMsg: string = "Hello";
 
         created(): void {
             // Set focus on 'header' for Screen Readers
-            setTimeout(() => {
-                (document.getElementById('user-form') as HTMLElement).focus();
-            }, 50);
-            
-            const r: any = this.user;
-            this.title = ((r.alias === '') ? `${ r.firstName } ${ r.lastName }` : `${ r.alias } (${ r.firstName }) ${ r.lastName }`);
+            setTimeout(() => { (document.getElementById('user-form') as HTMLElement).focus(); }, 50);
+
+            const u: IUser = this.user;
+            this.title = ((u.alias === '') ? `${ u.firstName } ${ u.lastName }` : `${ u.alias } (${ u.firstName }) ${ u.lastName }`);
 
             // Cache form data (no way to prompt user of data loss if they refresh or navigate to another page)
             // Use passed data if no cache (i.e. new edit)
-            const keys: Array<string> = Object.keys(r);
-            const vals: Array<string> = Object.values(r);
+            const keys: Array<string> = Object.keys(u);
+            const vals: Array<string> = Object.values(u);
             keys.forEach((key: string, i: number) => this.original[key] = vals[i]);
 
             // Use cahced data if present
-            const form: Object = JSON.parse(sessionStorage.getItem('user.form') || '{}');
-            if (Object.keys(form).length === 0) keys.forEach((key: string, i: number) => this.form[key] = vals[i]);
-            else Object.keys(form).forEach((key: string, i: number) => this.form[key] = Object.values(form)[i]);
+            const cachedU: Object = JSON.parse(sessionStorage.getItem('user.form') || '{}');
+            const cachedKeys: Array<string> = Object.keys(cachedU);
+            const cahcedVals: Array<string> = Object.values(cachedU);
+            if (cachedKeys.length > 0) cachedKeys.forEach((key: string, i: number) => this.form[key] = cahcedVals[i]);
+            else keys.forEach((key: string, i: number) => this.form[key] = vals[i]);
+
+            const cachedEditable: boolean = JSON.parse(sessionStorage.getItem('user.editable') || 'null');
+            if (cachedEditable !== null) this.canEdit = cachedEditable;
 
             // Cache data
             sessionStorage.setItem('user.original', JSON.stringify(this.original));
             sessionStorage.setItem('user.form', JSON.stringify(this.form));
+            sessionStorage.setItem('user.editable', JSON.stringify(this.canEdit));
             this.CheckIfCanSave();
         }
 
@@ -132,11 +147,10 @@
             // Clean up (cache not needed)
             sessionStorage.removeItem('user.original');
             sessionStorage.removeItem('user.form');
+            sessionStorage.removeItem('user.editable');
         }
 
         UpdateUser(key: string, event: any): void {
-            // this.user[key] = event;
-
             this.form[key] = event;
             sessionStorage.setItem('user.form', JSON.stringify(this.form));
             this.CheckIfCanSave();
@@ -146,8 +160,8 @@
             const o: Object = JSON.stringify(this.original);
             const f: Object = JSON.stringify(this.form);
             this.btnClass = ((o !== f) ? "" : "btnDisabled");
-            this.canSave = (o !== f);
             this.dirty = (o !== f);
+            this.canSave = (o !== f);
         }
 
         SaveForm(): void {
@@ -163,7 +177,7 @@
                 loaderElem.scrollIntoView();
             }, 15); 
 
-            // !!should save data here instead of passing back to parent
+            // !!should save data here instead of pretending to save after 2s
             setTimeout(() => {
                 console.log('saved data:', this.form);
 
@@ -176,7 +190,7 @@
                 // reset form with updated data
                 this.original = savedData;
                 this.CheckIfCanSave();
-                elems.forEach(elem => (elem.removeAttribute('inert')));
+                elems.forEach((elem: Element) => elem.removeAttribute('inert'));
                 setTimeout(() => { (document.getElementById('user-edit-cancel') as HTMLElement).focus(); }, 50);
             }, 2000);
         }

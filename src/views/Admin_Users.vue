@@ -1,13 +1,13 @@
 <template>
     <div id="admin-users" v-if="Auth_IsAuthenticated() || DEBUG" tabindex="-1">
         <br/>
+        <h1>Users</h1>
         <table id="users" cellspacing="0" width="100%">
             <caption>User Information</caption>
             <thead>
                 <tr>
                     <th scope="col" class="resultIcon"></th>
                     <th scope="col">Name</th>
-                    <th scope="col">Office</th>
                     <th scope="col" class="resultPhone">Phone</th>
                     <th scope="col" class="resultExt">Ext</th>
                     <th scope="col" class="resultPhone">Fax</th>
@@ -18,15 +18,12 @@
             <tbody>
                 <tr class="record" v-for="(user, index) in users" :key="index">
                     <td class="resultIcon">
-                        <button type="button" class="fas fa-pencil-alt" @click="Edit(user);">
-                            <span class="hidden">Edit {{ user.alias || user.firstName }} {{ user.lastName }}</span>
+                        <button type="button" class="fas fa-pencil-alt" @click="OpenForm(user, true);">
+                            <span class="hidden">Edit {{ GenerateUsersName(user) }}</span>
                         </button>
                     </td>
-                    <td>{{ user.alias || user.firstName }} {{ user.lastName }}</td>
                     <td>
-                        {{ user.school }}
-                        <br><br>
-                        {{ user.posn }}
+                        <span class="fakeLink" @click="OpenForm(user, false)">{{ GenerateUsersName(user) }}</span>
                     </td>
                     <td>{{ user.phone | FPhoneNumber }}</td>
                     <td>{{ user.extension }}</td>
@@ -38,20 +35,24 @@
         </table>
 
         <div id="users-mobile-view" v-for="(user, index) in users" :key="index">
-            <button type="button" class="fas fa-pencil-alt btn btnNormal" @click="Edit(user);">
-                Edit
-                <span class="hidden">{{ user.alias || user.firstName }} {{ user.lastName }}</span>
-            </button>
-            <User :user="user" :type="'edit-user'"></User>
+            <user :user="user" :type="'edit-user'">
+                <div class="injectedTitle">
+                    <button type="button" class="fas fa-pencil-alt" @click="OpenForm(user, true);">
+                        <span class="hidden">Edit {{ GenerateUsersName(user) }}</span>
+                    </button>
+                    <span :id="`region${ index }`" class="title fakeLink" @click="OpenForm(user, false);">{{ GenerateUsersName(user) }}</span>
+                </div>
+            </user>
         </div>
 
         <loader :label="'Loading...'" :display="loading"></loader>
+
         <div v-if="apiFail">
             Request failed. Please try again later.
             <br/><br/>
         </div>
 
-        <users-edit v-if="editing" :user="selectedResult" @returnedFormData="ReturnedFormData($event);"></users-edit>
+        <users-edit v-if="editing || viewing" :user="selectedResult" @returnedFormData="ReturnedFormData($event);" :editable="editing"></users-edit>
     </div>
 </template>
 
@@ -85,11 +86,12 @@
     export default class Admin_Users extends Vue {
         DEBUG: boolean = false;
 
-        users: Array<any> = [];
-        selectedResult: any = {};
+        users: Array<any | IUser> = [];
+        selectedResult: any | IUser = {};
         loading: boolean = true;
         apiFail: boolean = false;
         editing: boolean = false;
+        viewing: boolean = false;
 
         // DEBUG:
         // formResults: any = {};
@@ -100,7 +102,7 @@
 
                 // Load Edit form if cached data is present
                 const original: Object = JSON.parse(sessionStorage.getItem('user.original') || '{}');
-                if (Object.keys(original).length > 0) this.Edit(original);
+                if (Object.keys(original).length > 0) this.OpenForm(original, true);
             }
             else Auth.methods.Auth_Login();
         }
@@ -178,9 +180,13 @@
             this.apiFail = true;
         }
 
-        Edit(result: Object): void {
+        GenerateUsersName(user: any): string {
+            return `${ user.alias || user.firstName } ${ user.lastName }`;
+        }
+
+        OpenForm(result: Object, editable: boolean): void {
             this.selectedResult = result;
-            this.editing = true;
+            editable ? (this.editing = true) : (this.viewing = true);
 
             // disable navigation & edit buttons
             const navElems: NodeListOf<Element> = document.querySelectorAll('navigation-tabs');
@@ -191,6 +197,7 @@
 
         ReturnedFormData(event: any): void {
             this.editing = false;
+            this.viewing = false;
             this.loading = true;
             this.users = [];
             this.selectedResult = {};
@@ -198,8 +205,7 @@
             // enable navigation & edit buttons
             const navElems: NodeListOf<Element> = document.querySelectorAll('navigation-tabs');
             const elems: NodeListOf<Element> = document.querySelectorAll('#admin-users button');
-            // navElems.forEach(navElem => (navElem.removeAttribute('inert')));
-            elems.forEach(elem => (elem.removeAttribute('inert')));
+            elems.forEach((elem: Element) => elem.removeAttribute('inert'));
 
             // this.formResults = event;
 
@@ -209,24 +215,36 @@
 </script>
 
 <style scoped>
+    h1 {
+        padding-left: 25px;
+        text-align: left;
+    }
+    
     caption {
         height: 1px;
         width: 1px;
         overflow: hidden;
     }
 
-    #new-btn {
+    .injectedTitle {
         display: flex;
-        margin: 10px 0px -10px 20px;
-    }
-    
-    .resultOther {
-        width: 130px;
     }
 
-    .resultGrid {
-        display: grid;
-        grid-template-columns: 20px auto;
+    .injectedTitle .fas {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 21px;
+        margin: 0px;
+        padding: 10px 0px 10px 10px;
+    }
+
+    .fakeLink {
+        color: #000;
+    }
+
+    .fakeLink:hover {
+        color: #0000da;
     }
 
     #users-mobile-view {
@@ -234,19 +252,7 @@
         display: none;
     }
 
-    #users-mobile-view button {
-        margin: 10px 0px 0px 20px;
-    }
-
-    #users-mobile-view .fas::before {
-        padding-right: 5px;
-    }
-
     @media screen and (max-width: 1032px) {
-        #new-btn {
-            margin-bottom: 10px;
-        }
-
         table {
             display: none;
         }

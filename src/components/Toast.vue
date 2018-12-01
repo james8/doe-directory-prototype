@@ -12,7 +12,6 @@
 
 <script lang="ts">
     import { Vue, Component, Prop } from "vue-property-decorator";
-import { setTimeout } from 'timers';
 
     @Component
     export default class Toast extends Vue {

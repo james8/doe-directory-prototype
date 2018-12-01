@@ -6,18 +6,21 @@
     @Prop placeHolder?: string  -> Value for input field place holder (optional)
     @Prop isDisabled?: boolean  -> Flag if input field is disabled/enabled (optional)
     @Prop isRequired?: boolean  -> Flag if input field is required (optional)
+    @Prop errorMsg?: string	    -> Error message to be displayed
 
     @Output Changed(Event)
         -> Function called whenever input field changes; Passes value of input field back to parent Component
 -->
 
 <template>
-    <div id="InputField">
+    <div id="input-field">
         <label :for="id" v-if="label !== undefined">
             {{ label }}:
             <span class="required" v-if="this.isRequired">*</span>
         </label>
         <input :id="id" :placeholder="placeHolder" :disabled="isDisabled" :required="isRequired" v-model="vModel" @focus="FocusChange(true)" @blur="FocusChange(false)" @keyup="Changed($event)" />
+        <!-- <span class="errorMessage" v-if="errorMsg !== undefined">{{ errorMsg }}</span> -->
+        <slot></slot>
     </div>
 </template>
 
@@ -44,6 +47,7 @@
         @Prop({ type: String }) placeHolder!: string;
         @Prop({ type: Boolean }) isDisabled!: boolean;
         @Prop({ type: Boolean }) isRequired!: boolean;
+        @Prop({ type: String }) errorMsg!: string;
 
         vModel: string = "";
 
@@ -94,7 +98,7 @@
 </script>
 
 <style scoped>
-    #InputField {
+    #input-field {
         padding: 10px;
         text-align: left;
         display: flex;
