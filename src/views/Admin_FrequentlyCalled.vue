@@ -1,8 +1,8 @@
 <template>
-    <div id="admin-frequently-called">
+    <div id="admin-frequently-called" v-if="Auth_IsAuthenticated()">
         <br/>
         <h1>Frequently Called</h1>
-        <button type="button" id="fc-add" class="btn btnSuccess" @click="adding = true">
+        <button type="button" id="fc-add" class="btn btnSuccess" v-bind:class="{ btnDisabled: loading }" :disabled="loading" @click="OpenForm('{}');">
             <span class="fas fa-plus"></span>
             <span>new</span>
         </button>
@@ -16,7 +16,7 @@
                     <th scope="col" class="resultPhone">Contacts</th>
                     <th scope="col">Email</th>
                     <th scope="col">Site</th>
-                    <th scope="col" class="resultModified">Modified</th>
+                    <th scope="col">Modified</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +27,10 @@
                         </button>
                     </td>
                     <td>
-                        <span class="fakeLink" @click="OpenForm(fc, false);">{{ fc.title }}</span>
+                        <span class="fakeLink" @click="OpenForm(fc, false);" tabindex="0">
+                            <span class="hidden">View</span>
+                            {{ fc.title }}
+                        </span>
                     </td>
                     <td>
                         <div class="contacts">
@@ -37,7 +40,7 @@
                     </td>
                     <td class="wordBreak">{{ fc.email }}</td>
                     <td class="wordBreak">{{ fc.site }}</td>
-                    <td>{{ fc.modified }}</td>
+                    <td>{{ fc.lastModifiedBy }}<br/>{{ fc.lastModified | FDateTime2 }}</td>
                 </tr>
             </tbody>
         </table>
@@ -48,7 +51,10 @@
                     <button type="button" class="fas fa-pencil-alt" @click="OpenForm(fc, true);">
                         <span class="hidden">Edit {{ fc.title }}</span>
                     </button>
-                    <span :id="`region${ index }`" class="title fakeLink" @click="OpenForm(fc, false);">{{ fc.title }}</span>
+                    <span :id="`region${ index }`" class="title fakeLink" @click="OpenForm(fc, false);" tabindex="0">
+                        <span class="hidden">View</span>
+                        {{ fc.title }}
+                    </span>
                 </div>
             </user>
         </div>
@@ -66,6 +72,7 @@
     import Auth from "@/mixins/Auth.ts";
     import data from "@/../data/frequentlyCalledResults.ts";
 
+    import FDateTime2 from "@/filters/DateTime2.ts";
     import FPhoneNumber from "@/filters/PhoneNumber.ts";
 
     import IFrequentlyCalled from "@/interfaces/IFrequentlyCalled.ts";
@@ -83,6 +90,7 @@
             User
         },
         filters: {
+            'FDateTime2': FDateTime2,
             'FPhoneNumber': FPhoneNumber
         },
         mixins: [
@@ -97,6 +105,15 @@
         adding: boolean = false;
         editing: boolean = false;
         viewing: boolean = false;
+
+        disabledElems: Array<string> = [
+            '.menuToggle',
+            '.normalMenu a',
+            '.normalMenu button',
+            '#fc-add',
+            '.fa-pencil-alt',
+            '.fakeLink'
+        ];
 
         created(): void {
             if (Auth.methods.Auth_IsAuthenticated()) {
@@ -128,16 +145,14 @@
             });
         }
 
-        OpenForm(result: Object, editable: boolean): void {
+        OpenForm(result: Object, editable?: boolean): void {
             this.selectedResult = result;
             if (this.selectedResult !== '{}') editable ? (this.editing = true) : (this.viewing = true);
             else this.adding = true;
 
-            // disable navigation & edit buttons
-            const navElems: NodeListOf<Element> = document.querySelectorAll('navigation-tabs');
-            const elems: NodeListOf<Element> = document.querySelectorAll('#admin-frequently-called button');
-            elems.forEach(elem => (elem.setAttribute('inert', '')));
-            // (document.getElementById('NavigationTabs') as HTMLInputElement).setAttribute('inert', '');            
+            // Disable Menu, Add, & Edit buttons
+            const elems: NodeListOf<Element> = document.querySelectorAll(this.disabledElems.toString());
+            elems.forEach((elem: Element) => elem.setAttribute('inert', ''));
         }
 
         ReturnedFCData(event: any): void {
@@ -148,9 +163,8 @@
             this.frequentlyCalled = [];
             this.selectedResult = {};
 
-            // enable navigation & edit buttons
-            const navElems: NodeListOf<Element> = document.querySelectorAll('navigation-tabs');
-            const elems: NodeListOf<Element> = document.querySelectorAll('#admin-frequently-called button');
+            // Re-enable Menu, Add, & Edit buttons
+            const elems: NodeListOf<Element> = document.querySelectorAll(this.disabledElems.toString());
             elems.forEach((elem: Element) => elem.removeAttribute('inert'));
 
             this.Load();

@@ -32,36 +32,44 @@
                 Modified By: {{ user.lastModifiedBy }} - {{ user.lastModified | FDateTime2 }}
             </div>
 
-            <input-field :id="'u-alias'"
-                :label="'Alias (first name only)'" :value="form.alias" :isDisabled="!canEdit"
+            <input-field :id="'u-alias'" :isDisabled="!canEdit"
+                :label="'Alias (first name only)'" :value="form.alias"
                 @inputChange="UpdateUser('alias', $event);">
             </input-field>
 
             <div class="phoneGroup">
-                <input-field :id="'u-phone'" :type="'phone'"
-                    :label="'Phone'" :value="form.phone | FPhoneNumber" :isDisabled="!canEdit"
+                <input-field :id="'u-phone'" :type="'phone'" :isDisabled="!canEdit"
+                    :label="'Phone'" :value="form.phone | FPhoneNumber"
+                    :errorId="'errorPhone'" :errorMsg="errorPhone"
                     @inputChange="UpdateUser('phone', $event);">
                 </input-field>
 
-                <input-field :id="'u-ext'" :type="'phone-extension'"
-                    :label="'Ext'" :value="form.extension" :isDisabled="!canEdit"
+                <input-field :id="'u-ext'" :type="'phone-extension'" :isDisabled="!canEdit"
+                    :label="'Ext'" :value="form.extension"
                     @inputChange="UpdateUser('extension', $event);">
                 </input-field>
             </div>
 
-            <input-field :id="'u-fax'" :type="'phone'"
-                :label="'Fax'" :value="form.fax | FPhoneNumber" :isDisabled="!canEdit"
+            <input-field :id="'u-fax'" :type="'phone'" :isDisabled="!canEdit"
+                :label="'Fax'" :value="form.fax | FPhoneNumber"
+                :errorId="'errorFax'" :errorMsg="errorFax"
                 @inputChange="UpdateUser('fax', $event);">
             </input-field>
 
-            <input-field :id="'u-cellular'" :type="'phone'"
-                :label="'Cellular'" :value="form.cellular | FPhoneNumber" :isDisabled="!canEdit"
+            <input-field :id="'u-cellular'" :type="'phone'" :isDisabled="!canEdit"
+                :label="'Cellular'" :value="form.cellular | FPhoneNumber"
+                :errorId="'errorCellular'" :errorMsg="errorCellular"
                 @inputChange="UpdateUser('cellular', $event);">
             </input-field>
 
             <div class="buttons">
-                <button type="button" id="user-edit-save" class="btn btnSuccess" @click="SaveForm();" v-if="canEdit" :disabled="!canSave" v-bind:class="btnClass">Save</button>
-                <button type="button" id="user-edit-cancel" class="btn btnError" @click="CancelForm();">{{ this.dirty ? 'Cancel' : 'Close' }}</button>
+                <button type="button" id="user-edit-save" class="btn btnSuccess" v-bind:class="{ btnDisabled: !canSave }"
+                    v-if="canEdit" :disabled="!canSave" @click="SaveForm();">
+                    Save
+                </button>
+                <button type="button" id="user-edit-cancel" class="btn btnError" @click="CancelForm();">
+                    Cancel
+                </button>
             </div>
 
             <loader :aria-busy="saving" :label="'Saving...'" :display="saving"></loader>
@@ -99,13 +107,14 @@
         @Prop({ type: Boolean, required: true }) editable!: boolean;
         
         title: string = "";
-        btnClass: string = "btnDisabled";
 
         original: any = {};
         form: any = {};
+        errorPhone: string = "";
+        errorFax: string = "";
+        errorCellular: string = "";
 
         canEdit: boolean = this.editable;
-        dirty: boolean = false;
         canSave: boolean = false;
         saving: boolean = false;
 
@@ -157,11 +166,15 @@
         }
 
         CheckIfCanSave(): void {
-            const o: Object = JSON.stringify(this.original);
-            const f: Object = JSON.stringify(this.form);
-            this.btnClass = ((o !== f) ? "" : "btnDisabled");
-            this.dirty = (o !== f);
-            this.canSave = (o !== f);
+            const o: string = JSON.stringify(this.original);
+            const f: string = JSON.stringify(this.form);
+            const form: any = this.form;
+
+            this.errorPhone = ((form.phone !== '') && (form.phone.length < 10)) ? "Invalid number provided." : "";
+            this.errorFax = ((form.fax !== '') && (form.fax.length < 10)) ? "Invalid number provided." : "";
+            this.errorCellular = ((form.cellular !== '') && (form.cellular.length < 10)) ? "Invalid number provided." : "";
+
+            this.canSave = (o !== f) && (!this.errorPhone && !this.errorFax && !this.errorCellular);
         }
 
         SaveForm(): void {
@@ -170,7 +183,6 @@
             elems.forEach(elem => (elem.setAttribute('inert', '')));
             
             // save data
-            this.showToast = false;
             this.saving = true; 
             setTimeout(() => {
                 const loaderElem: HTMLElement = document.getElementById('loader') as HTMLElement;
@@ -187,17 +199,23 @@
                 this.toastMsg = `User '${ savedData.alias || savedData.firstName } ${ savedData.lastName }' successfully updated`; 
                 this.showToast = true;
 
-                // reset form with updated data
-                this.original = savedData;
-                this.CheckIfCanSave();
-                elems.forEach((elem: Element) => elem.removeAttribute('inert'));
-                setTimeout(() => { (document.getElementById('user-edit-cancel') as HTMLElement).focus(); }, 50);
+                // reset form with updated data after toast closes
+                setTimeout(() => {
+                    this.original = savedData;
+                    this.CheckIfCanSave();
+                    elems.forEach((elem: Element) => elem.removeAttribute('inert'));
+                    setTimeout(() => { (document.getElementById('user-edit-cancel') as HTMLElement).focus(); }, 50);
+                }, 2500);
             }, 2000);
         }
 
         CancelForm(): void {
+            const o: string = JSON.stringify(this.original);
+            const f: string = JSON.stringify(this.form);
+            const dirty: boolean = (o !== f);
+
             let cancel: boolean = true;
-            if (this.dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
+            if (dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
             if (cancel) this.$emit('returnedFormData', null);
         }
     }

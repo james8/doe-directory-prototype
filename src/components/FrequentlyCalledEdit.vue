@@ -2,34 +2,41 @@
     @Prop frequentlyCalled: IFrequentlyCalled       -> Frequently Called information to populate Edit form
     @Prop editable: boolean                         -> Flag if form is editable or not
 
-    @Output SaveForm()                              -> Saves updated information for FC item; Passes information to Parent Component
+    @Output SaveForm()                              -> Saves updated information for FC item
     @Output CancelForm()                            -> Confirms if Cancel is desired; Passes null back to Parent Component
 -->
 
 <template>
-    <div class="form">
+    <div id="frequently-called-edit" class="form">
         <backdrop></backdrop>
         <toast v-if="showToast" :type="toastType" :msg="toastMsg" @closeToast="showToast = $event"></toast>
 
         <form id="frequently-called-edit-form">
             <header>{{ title }}</header>
 
+            <span>All fields with a (*) are required fields</span>
+            <br />
+            <br />
+
             <div class="summaryModified">
                 Modified By: {{ frequentlyCalled.lastModifiedBy }} - {{ frequentlyCalled.lastModified | FDateTime2 }}
             </div>
 
-            <input-field :id="'fc-title'"
-                :label="'Title'" :value="form.title" :isDisabled="!canEdit"
+            <input-field :id="'fc-title'" :isRequired="true" :isDisabled="!canEdit"
+                :label="'Title'" :value="form.title"
+                :errorId="'errorTitle'" :errorMsg="errorTitle"
                 @inputChange="UpdateFrequentlyCalled('title', $event);"> 
             </input-field>
 
-            <input-field :id="'fc-contact1'" :type="'phone'"
-                :label="'Contact'" :value="form.contact | FPhoneNumber" :isDisabled="!canEdit"
+            <input-field :id="'fc-contact'" :type="'phone'" :isRequired="true" :isDisabled="!canEdit"
+                :label="'Contact'" :value="form.contact | FPhoneNumber"
+                :errorId="'errorContact'" :errorMsg="errorContact"
                 @inputChange="UpdateFrequentlyCalled('contact', $event);"> 
             </input-field>
 
-            <input-field :id="'fc-contact2'" :type="'phone'"
-                :label="'Contact 2'" :value="form.contact2 | FPhoneNumber" :isDisabled="!canEdit"
+            <input-field :id="'fc-contact2'" :type="'phone'" :isDisabled="!canEdit"
+                :label="'Contact 2'" :value="form.contact2 | FPhoneNumber"
+                :errorId="'errorContact2'" :errorMsg="errorContact2"
                 @inputChange="UpdateFrequentlyCalled('contact2', $event);"> 
             </input-field>
 
@@ -44,12 +51,12 @@
             </input-field>
 
             <div class="buttons">
-                <button type="button" id="fc-edit-save" class="btn btnSuccess" v-bind:class="btnClass"
+                <button type="button" id="fc-edit-save" class="btn btnSuccess" v-bind:class="{ btnDisabled: !canSave }"
                     v-if="canEdit" :disabled="!canSave" @click="SaveForm();">
                     Save
                 </button>
                 <button type="button" id="fc-edit-cancel" class="btn btnError" @click="CancelForm();">
-                    {{ this.dirty ? 'Cancel' : 'Close' }}
+                    Cancel
                 </button>
             </div>
 
@@ -88,13 +95,14 @@
         @Prop({ type: Boolean, required: true }) editable!: boolean;
 
         title: string = "";
-        btnClass: string = "btnDisabled";
 
         original: any = {};
         form: any = {};
+        errorTitle: string = "";
+        errorContact: string = "";
+        errorContact2: string = "";
         
         canEdit: boolean = this.editable;
-        dirty: boolean = false;
         canSave: boolean = false;
         saving: boolean = false;
 
@@ -146,11 +154,16 @@
         }
 
         CheckIfCanSave(): void {
-            const o: Object = JSON.stringify(this.original);
-            const f: Object = JSON.stringify(this.form);
-            this.btnClass = ((o !== f) ? "" : "btnDisabled");
-            this.dirty = (o !== f);
-            this.canSave = (o !== f);
+            const o: string = JSON.stringify(this.original);
+            const f: string = JSON.stringify(this.form);
+            const form: any = this.form;
+
+            this.errorTitle = (form.title === '') ? "A Title is required." : "";
+            this.errorContact = (form.contact === '') ? "A Contact number is required."
+                : ((form.contact.length < 10) ? "Invalid number provided." : "");
+            this.errorContact2 = ((form.contact2 !== '') && (form.contact2.length < 10)) ? "Invalid number provided." : "";
+
+            this.canSave = (o !== f) && (!this.errorTitle && !this.errorContact && !this.errorContact2);
         }
 
         SaveForm(): void {
@@ -175,17 +188,23 @@
                 this.toastMsg = `Frequently Called '${ savedData.title }' successfully updated`;
                 this.showToast = true;
                 
-                // reset form with updated data
-                this.original = savedData;
-                this.CheckIfCanSave();
-                elems.forEach((elem: Element) => elem.removeAttribute('inert'));
-                setTimeout(() => { (document.getElementById('fc-edit-cancel') as HTMLElement).focus() }, 50);
+                // reset form with updated data after toast closes
+                setTimeout(() => {
+                    this.original = savedData;
+                    this.CheckIfCanSave();
+                    elems.forEach((elem: Element) => elem.removeAttribute('inert'));
+                    setTimeout(() => { (document.getElementById('fc-edit-cancel') as HTMLElement).focus() }, 50);
+                }, 2500);
             }, 2000);
         }
 
         CancelForm(): void {
+            const o: string = JSON.stringify(this.original);
+            const f: string = JSON.stringify(this.form);
+            const dirty: boolean = (o !== f);
+
             let cancel: boolean = true;
-            if (this.dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
+            if (dirty) cancel = confirm("Are you sure you want to close the form? Any unsaved data will be lost.");
             if (cancel) this.$emit('returnedFCData', null);
         }
     }

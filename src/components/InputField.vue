@@ -6,21 +6,23 @@
     @Prop placeHolder?: string  -> Value for input field place holder (optional)
     @Prop isDisabled?: boolean  -> Flag if input field is disabled/enabled (optional)
     @Prop isRequired?: boolean  -> Flag if input field is required (optional)
-    @Prop errorMsg?: string	    -> Error message to be displayed
+    @Prop errorId?: string      -> ID used to populate aria-describedby (optional)
+    @Prop errorMsg?: string	    -> Error message to be displayed (optional)
 
-    @Output Changed(Event)
-        -> Function called whenever input field changes; Passes value of input field back to parent Component
+    @Output Changed(Event)      -> Function called whenever input field changes; Passes value of input field back to Parent Component
 -->
 
 <template>
     <div id="input-field">
         <label :for="id" v-if="label !== undefined">
-            {{ label }}:
-            <span class="required" v-if="this.isRequired">*</span>
+            {{ label }}
+            <span class="required" v-if="this.isRequired" aria-hidden="true">*</span>
         </label>
-        <input :id="id" :placeholder="placeHolder" :disabled="isDisabled" :required="isRequired" v-model="vModel" @focus="FocusChange(true)" @blur="FocusChange(false)" @keyup="Changed($event)" />
-        <!-- <span class="errorMessage" v-if="errorMsg !== undefined">{{ errorMsg }}</span> -->
-        <slot></slot>
+        <input :id="id" :placeholder="placeHolder" :disabled="isDisabled" v-model="vModel"
+            :required="isRequired"
+            :aria-describedby="errorId"
+            @focus="FocusChange(true)" @blur="FocusChange(false)" @keyup="Changed($event)" />
+        <span :id="errorId" class="inputError">{{ errorMsg }}</span>
     </div>
 </template>
 
@@ -47,6 +49,7 @@
         @Prop({ type: String }) placeHolder!: string;
         @Prop({ type: Boolean }) isDisabled!: boolean;
         @Prop({ type: Boolean }) isRequired!: boolean;
+        @Prop({ type: String }) errorId!: string;
         @Prop({ type: String }) errorMsg!: string;
 
         vModel: string = "";
@@ -54,6 +57,13 @@
         created(): void {
             // Set Input value if provided
             if (this.value !== undefined) this.vModel = this.value;
+            
+            setTimeout(() => {
+                const elems: NodeListOf<Element> = document.querySelectorAll(`#${ this.id }`);
+                if (this.type === 'phone') {
+                    elems.forEach((elem: Element) => elem.setAttribute('pattern', '[0-9]{10,11}'));
+                }
+            }, 500);
         }
 
         // Used for extra formatting when focused
@@ -111,5 +121,13 @@
 
     input {
         padding: 5px;
+    }
+
+    .inputError {
+        color: #ef5350;
+        font-size: 14px;
+        font-style: italic;
+        font-weight: bold;
+        padding-top: 5px;
     }
 </style>

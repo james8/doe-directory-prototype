@@ -1,9 +1,10 @@
 <!--
-
+    @Output SaveForm()      -> Saves information for new FC item; Closes form when done
+    @Output CancelForm()    -> Confirms if Cancel is desired; Passes null back to Parent Component
 -->
 
 <template>
-    <div class="form">
+    <div id="frequently-called-add" class="form">
         <backdrop></backdrop>
         <toast v-if="showToast" :type="toastType" :msg="toastMsg" @closeToast="showToast = $event"></toast>
 
@@ -14,20 +15,20 @@
 
             <input-field :id="'fc-title'" :isRequired="true"
                 :label="'Title'" :value="form.title"
+                :errorId="'errorTitle'" :errorMsg="errorTitle"
                 @inputChange="UpdateFrequentlyCalled('title', $event);">
-                {{ errorTitle }}
             </input-field>
             
-            <input-field :id="'fc-contact'" :isRequired="true"
+            <input-field :id="'fc-contact'" :type="'phone'" :isRequired="true"
                 :label="'Contact'" :value="form.contact | FPhoneNumber"
+                :errorId="'errorContact'" :errorMsg="errorContact"
                 @inputChange="UpdateFrequentlyCalled('contact', $event);">
-                {{ errorContact }}
             </input-field>
             
-            <input-field :id="'fc-contact2'"
+            <input-field :id="'fc-contact2'" :type="'phone'"
                 :label="'Contact 2'" :value="form.contact2 | FPhoneNumber"
+                :errorId="'errorContact2'" :errorMsg="errorContact2"
                 @inputChange="UpdateFrequentlyCalled('contact2', $event);">
-                {{ errorContact2 }}
             </input-field>
             
             <input-field :id="'fc-email'"
@@ -41,7 +42,8 @@
             </input-field>
 
             <div class="buttons">
-                <button type="button" id="fc-add-save" class="btn btnSuccess" @click="SaveForm();">
+                <button type="button" id="fc-add-save" class="btn btnSuccess" v-bind:class="{ btnDisabled: !canSave }"
+                    :disabled="!canSave" @click="SaveForm();">
                     Create
                 </button>
                 <button type="button" id="fc-add-cancel" class="btn btnError" @click="CancelForm();">
@@ -86,7 +88,6 @@
         errorContact: string = "";
         errorContact2: string = "";
 
-        dirty: boolean = false;
         canSave: boolean = false;
         saving: boolean = false;
 
@@ -133,16 +134,18 @@
         UpdateFrequentlyCalled(key: string, event: any): void {
             this.form[key] = event;
             sessionStorage.setItem('frequently-called.form', JSON.stringify(this.form));
+            this.CheckIfCanSave();
         }
 
         CheckIfCanSave(): void {
-            this.canSave = false;
-            const f: any = this.form;
+            const form: any = this.form;
 
-            if (f.title === '') this.errorTitle = "A Title is required.";
-            if (f.contact === '') this.errorContact = "A Contact number is required.";
-            if ((f.contact.length !== 10) || (f.contact.length !== 11)) this.errorContact = "Invalid number provided.";
-            if ((f.contact2.length !== 10) || (f.contact2.length !== 11)) this.errorContact2 = "Invalid number provided.";
+            this.errorTitle = (form.title === '') ? "A Title is required." : "";
+            this.errorContact = (form.contact === '') ? "A Contact number is required."
+                : ((form.contact.length < 10)  ? "Invalid Contact number provided." : "");
+            this.errorContact2 = ((form.contact2 !== '') && (form.contact2.length < 10)) ? "Invalid Contact number provided." : "";
+
+            this.canSave = (!this.errorTitle && !this.errorContact && !this.errorContact2);
         }
 
         SaveForm(): void {
@@ -176,8 +179,12 @@
         }
 
         CancelForm(): void {
+            const o: string = JSON.stringify(this.original);
+            const f: string = JSON.stringify(this.form);
+            const dirty = (o !== f);
+
             let cancel: boolean = true;
-            if (this.dirty) cancel = confirm("Are you sure you want to close the form? New contact will be lost.");
+            if (dirty) cancel = confirm("Are you sure you want to close the form? New contact will be lost.");
             if (cancel) this.$emit('returnedFCData', null);
         }
     }

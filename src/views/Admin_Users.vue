@@ -2,7 +2,7 @@
     <div id="admin-users" v-if="Auth_IsAuthenticated() || DEBUG" tabindex="-1">
         <br/>
         <h1>Users</h1>
-        <table id="users" cellspacing="0" width="100%">
+        <table id="user-data" cellspacing="0" width="100%">
             <caption>User Information</caption>
             <thead>
                 <tr>
@@ -12,18 +12,21 @@
                     <th scope="col" class="resultExt">Ext</th>
                     <th scope="col" class="resultPhone">Fax</th>
                     <th scope="col" class="resultPhone">Cellular</th>
-                    <th scope="col">Last Modified</th>
+                    <th scope="col">Modified</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="record" v-for="(user, index) in users" :key="index">
                     <td class="resultIcon">
-                        <button type="button" class="fas fa-pencil-alt" @click="OpenForm(user, true);">
+                        <button type="button" class="fas fa-pencil-alt" @click="OpenForm(user, true);" :disabled="editing">
                             <span class="hidden">Edit {{ GenerateUsersName(user) }}</span>
                         </button>
                     </td>
                     <td>
-                        <span class="fakeLink" @click="OpenForm(user, false)">{{ GenerateUsersName(user) }}</span>
+                        <span class="fakeLink" @click="OpenForm(user, false)" tabindex="0">
+                            <span class="hidden">View</span>
+                            {{ GenerateUsersName(user) }}
+                        </span>
                     </td>
                     <td>{{ user.phone | FPhoneNumber }}</td>
                     <td>{{ user.extension }}</td>
@@ -40,7 +43,10 @@
                     <button type="button" class="fas fa-pencil-alt" @click="OpenForm(user, true);">
                         <span class="hidden">Edit {{ GenerateUsersName(user) }}</span>
                     </button>
-                    <span :id="`region${ index }`" class="title fakeLink" @click="OpenForm(user, false);">{{ GenerateUsersName(user) }}</span>
+                    <span :id="`region${ index }`" class="title fakeLink" @click="OpenForm(user, false);" tabindex="0">
+                        <span class="hidden">View</span>
+                        {{ GenerateUsersName(user) }}
+                    </span>
                 </div>
             </user>
         </div>
@@ -116,7 +122,7 @@
                             this.users = results[0];
 
                             // set focus on Component
-                            const display = getComputedStyle(document.getElementById('users') as HTMLElement).display;
+                            const display = getComputedStyle(document.getElementById('user-data') as HTMLElement).display;
                             setTimeout(() => {
                                 if (display === 'table') (document.getElementById('admin-users') as HTMLElement).focus();
                                 else (document.querySelector('#users-mobile-view button') as HTMLElement).focus();

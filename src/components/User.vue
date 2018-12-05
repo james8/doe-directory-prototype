@@ -100,7 +100,8 @@
                         this.info.push({ key: 'Email', value: user.email, longVal: true });
                     if (user.site !== '')
                         this.info.push({ key: 'Site', value: user.site, longVal: true });
-                    this.info.push({ key: 'Modified', value: user.modified, longVal: true });
+                    this.info.push({ key: 'Modified By', value: user.lastModifiedBy || '' });
+                    this.info.push({ key: 'Modified', value: FDateTime2(user.lastModified) });
 
                     break;
                 }
