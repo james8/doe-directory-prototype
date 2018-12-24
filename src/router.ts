@@ -13,6 +13,11 @@ export default new Router({
             component: (() => import("@/views/Search.vue"))
         },
         {
+            path: "/search2",
+            name: "Search2",
+            component: (() => import("@/views/Search2.vue"))
+        },
+        {
             path: "/frequently-called",
             name: "Frequently Called",
             component: (() => import("@/views/FrequentlyCalled.vue"))

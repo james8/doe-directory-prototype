@@ -15,46 +15,46 @@
                 <div v-if="selectedRadioBtn === 0">
                     <div class="searchOption">
                         <label for="district">District</label>
-                        <select-box-field :id="'district'" :options="districts.filter((d) => (d.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'district'" :options="districts.filter((d) => (d.type === 'school'))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.District"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex-area">Complex Area</label>
-                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.type === 'school' && (ca.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '')))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.ComplexArea"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex">Complex</label>
-                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.type === 'school') && (c.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '') && (c.complexArea === this.advancedSearchOptions.ComplexArea || this.advancedSearchOptions.ComplexArea === ''))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.Complex"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="school">School</label>
-                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.type === 'school') && (s.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '') && (s.complexArea === this.advancedSearchOptions.ComplexArea || this.advancedSearchOptions.ComplexArea === '') && (s.complex === this.advancedSearchOptions.Complex || this.advancedSearchOptions.Complex === ''))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.School"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="position">Position</label>
-                        <select-box-field :id="'position'" :options="positions.filter((p) => (p.Type === 'school'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'position'" :options="fpositions" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.Position"></select-box-field>
                     </div>
                 </div>
                 <!-- State Office -->
                 <div v-else-if="selectedRadioBtn === 1">
                     <div class="searchOption">
                         <label for="district">Office</label>
-                        <select-box-field :id="'district'" :options="districts.filter((district) => (district.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'district'" :options="districts.filter((district) => (district.type === 'office'))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.District"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex-area">Branch</label>
-                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex-area'" :options="complexAreas.filter((ca) => (ca.type === 'office' && (ca.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '')))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.ComplexArea"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="complex">Section</label>
-                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'complex'" :options="complexes.filter((c) => (c.type === 'office') && (c.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '') && (c.complexArea === this.advancedSearchOptions.ComplexArea || this.advancedSearchOptions.ComplexArea === ''))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.Complex"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="school">Sub-Section</label>
-                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'school'" :options="schools.filter((s) => (s.type === 'office') && (s.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '') && (s.complexArea === this.advancedSearchOptions.ComplexArea || this.advancedSearchOptions.ComplexArea === '') && (s.complex === this.advancedSearchOptions.Complex || this.advancedSearchOptions.Complex === ''))" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.School"></select-box-field>
                     </div>
                     <div class="searchOption">
                         <label for="position">Position</label>
-                        <select-box-field :id="'position'" :options="positions.filter((p) => (p.Type === 'office'))" :selectorLabel="'Label'" :selectorValue="'Label'" @selectChange="ReturnedSelectFieldChange($event);"></select-box-field>
+                        <select-box-field :id="'position'" :options="fpositions" :selectorLabel="'label'" :selectorValue="'value'" @selectChange="ReturnedSelectFieldChange($event);" :value="this.advancedSearchOptions.Position"></select-box-field>
                     </div>
                 </div>
             </div>
@@ -70,13 +70,14 @@
     import Loader from "@/components/Loader.vue";
     import RadioField from "@/components/RadioField.vue";
     import SelectBoxField from "@/components/SelectBoxField.vue";
+import SearchBox from '@/components/SearchBox.vue';
 
     // Mock Data
-    import districts from "@/../data/districts.ts"
-    import complexAreas from "@/../data/complexAreas.ts";
-    import complexes from "@/../data/complexes.ts";
-    import schools from "@/../data/schools.ts";
-    import positions from "@/../data/positions.ts";
+    //import districts from "@/../data/districts.ts"
+    //import complexAreas from "@/../data/complexAreas.ts";
+    //import complexes from "@/../data/complexes.ts";
+    //import schools from "@/../data/schools.ts";
+    //import positions from "@/../data/positions.ts";
 
     class AdvancedSearchOption {
         private _district: string;
@@ -124,6 +125,7 @@
         complexes: Array<Object> = [];
         schools: Array<Object> = [];
         positions: Array<Object> = [];
+        fpositions: Array<Object> = [];
         
         created(): void {
             this.radioBtns.push({
@@ -154,52 +156,140 @@
         QueryDistricts(): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
                 // Fake Data
-                setTimeout(() => { resolve(districts) }, 1000);
+                //setTimeout(() => { resolve(districts) }, 1000);
+                //const searchParams: string = 'x';
+                let formData: FormData = new FormData();
+                    //formData.append('SearchParam', searchParams);
+
+                    fetch('https://localhost:44352/api/districts', {
+                        method: 'POST',
+                        body: formData 
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error)); 
             });
         }
 
         QueryComplexAreas(): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
                 // Fake Data
-                setTimeout(() => { resolve(complexAreas) }, 1500);
+                //setTimeout(() => { resolve(complexAreas) }, 1500);
+                let formData: FormData = new FormData();
+                    //formData.append('SearchParam', searchParams);
+
+                    fetch('https://localhost:44352/api/complexareas', {
+                        method: 'POST',
+                        body: formData 
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error));
             });
         }
 
         QueryComplexes(): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
                 // Fake Data
-                setTimeout(() => { resolve(complexes) }, 2000);
+                //setTimeout(() => { resolve(complexes) }, 2000);
+                let formData: FormData = new FormData();
+                    //formData.append('SearchParam', searchParams);
+
+                    fetch('https://localhost:44352/api/complexes', {
+                        method: 'POST',
+                        body: formData 
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error));
             });
         }
 
         QuerySchools(): Promise<Array<Object>> {
-            return new Promise((resolve, rejcet) => {
+            return new Promise((resolve, reject) => {
                 // Fake Data
-                setTimeout(() => { resolve(schools) }, 500);
+                //setTimeout(() => { resolve(schools) }, 500);
+                let formData: FormData = new FormData();
+                    //formData.append('SearchParam', searchParams);
+
+                    fetch('https://localhost:44352/api/schools', {
+                        method: 'POST',
+                        body: formData 
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error));
             });
         }
 
         QueryPositions(): Promise<Array<Object>> {
             return new Promise((resolve, reject) => {
                 // Fake Data
-                setTimeout(() => { resolve(positions) }, 1000);
+                //setTimeout(() => { resolve(positions) }, 1000);
+                let formData: FormData = new FormData();
+                    //formData.append('SearchParam', searchParams);
+
+                    fetch('https://localhost:44352/api/positions', {
+                        method: 'POST',
+                        body: formData 
+                    })
+                        .then(response => resolve(response.json()))
+                        .catch(error => reject(error));
             });
         }
         
         ReturnedRadioFieldChange(event: any): void {
             this.selectedRadioBtn = this.radioBtns.findIndex((btn: any) => (btn.key === event));
             this.advancedSearchOptions = new AdvancedSearchOption();
+            this.FilterArray('position', this.selectedRadioBtn);
 
             setTimeout(() => { this.CreateOptionsObj(); }, 50);
         }
 
         ReturnedSelectFieldChange(event: any): void {
-            if (event.id === 'district') this.advancedSearchOptions.District = event.value;
-            else if (event.id === 'complex-area') this.advancedSearchOptions.ComplexArea = event.value;
-            else if (event.id === 'complex') this.advancedSearchOptions.Complex = event.value;
-            else if (event.id === 'school') this.advancedSearchOptions.School = event.value;
+            if (event.id === 'district') {
+                this.advancedSearchOptions.District = event.value;
+                if (event.value === ''){
+                    setTimeout(() => {(document.getElementById('complex-area') as HTMLSelectElement).value = this.advancedSearchOptions.ComplexArea;},1); 
+                    setTimeout(() => {(document.getElementById('complex') as HTMLSelectElement).value = this.advancedSearchOptions.Complex;},1); 
+                    setTimeout(() => {(document.getElementById('school') as HTMLSelectElement).value = this.advancedSearchOptions.School;},1); 
+                    setTimeout(() => {(document.getElementById('position') as HTMLSelectElement).value = this.advancedSearchOptions.Position;},1); 
+                }else{
+                    this.advancedSearchOptions.ComplexArea = '';
+                    this.advancedSearchOptions.Complex = '';
+                    this.advancedSearchOptions.School = '';
+                    this.advancedSearchOptions.Position = '';
+                }
+            }
+            else if (event.id === 'complex-area') {
+                this.advancedSearchOptions.ComplexArea = event.value;
+                if (event.value === ''){
+                    setTimeout(() => {(document.getElementById('complex') as HTMLSelectElement).value = this.advancedSearchOptions.Complex;},1); 
+                    setTimeout(() => {(document.getElementById('school') as HTMLSelectElement).value = this.advancedSearchOptions.School;},1); 
+                    setTimeout(() => {(document.getElementById('position') as HTMLSelectElement).value = this.advancedSearchOptions.Position;},1); 
+                }else{
+                    this.advancedSearchOptions.Complex = '';
+                    this.advancedSearchOptions.School = '';
+                    this.advancedSearchOptions.Position = '';
+                }
+            }
+            else if (event.id === 'complex') {
+                this.advancedSearchOptions.Complex = event.value;
+                if (event.value === ''){
+                    setTimeout(() => {(document.getElementById('school') as HTMLSelectElement).value = this.advancedSearchOptions.School;},1); 
+                    setTimeout(() => {(document.getElementById('position') as HTMLSelectElement).value = this.advancedSearchOptions.Position;},1); 
+                }else{
+                    this.advancedSearchOptions.School = '';
+                    this.advancedSearchOptions.Position = '';
+                }
+            }
+            else if (event.id === 'school') {
+                this.advancedSearchOptions.School = event.value;
+                if (event.value === ''){
+                    setTimeout(() => {(document.getElementById('position') as HTMLSelectElement).value = this.advancedSearchOptions.Position;},1); 
+                }else{
+                    this.advancedSearchOptions.Position = '';
+                }
+            }
             else if (event.id === 'position') this.advancedSearchOptions.Position = event.value;
 
+            if (event.id !== 'position') this.FilterArray('position', this.selectedRadioBtn);
             setTimeout(() => { this.CreateOptionsObj(); }, 50);
         }
 
@@ -215,9 +305,42 @@
             radioBtns.forEach((btn: HTMLInputElement) => (btn.checked = false));
             this.advancedSearchOptions = new AdvancedSearchOption();
 
+
             setTimeout(() => { (document.querySelector('#search-category input') as HTMLElement).focus(); }, 50);
             
-            this.$emit('advancedSearchClear', '');
+            this.$emit('advancedSearchString', '');
+        }
+
+        FilterArray(whicharray:string, whichtype:Number): void{
+            let temparray:Array<any>;
+            const schoff:string = whichtype === 0 ? 'school' : 'office';
+
+            if(whicharray === 'position'){
+                temparray = this.positions.filter((p:any) => (p.type === schoff && (p.district === this.advancedSearchOptions.District || this.advancedSearchOptions.District === '') && (p.complexArea === this.advancedSearchOptions.ComplexArea || this.advancedSearchOptions.ComplexArea === '') && (p.complex === this.advancedSearchOptions.Complex || this.advancedSearchOptions.Complex === '') && (p.school === this.advancedSearchOptions.School || this.advancedSearchOptions.School === '')));
+                this.fpositions = [];
+
+                const pos = temparray.map(position => position.value);
+
+	            this.fpositions = pos.filter((p, pIndex) => pos.indexOf(p) >= pIndex).map((fp) => ({
+                    value: fp,
+                    label: fp }));
+                //let prev:string = '';
+                //temparray.forEach(pos => {  
+
+                    //if(pos.value !== prev){
+                    //    this.fpositions.push(pos);
+                    //    prev = pos.value;
+                    //}
+         
+                    //let flg:number = 0;
+                    //this.fpositions.forEach((fpos:any) => {
+                    //    if(fpos.value === pos.value){
+                    //       flg = 1; 
+                    //    }
+                    //})
+                    //if (flg === 0) this.fpositions.push(pos)
+                 //})                
+            }
         }
     }
 </script>
