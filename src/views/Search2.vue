@@ -8,6 +8,18 @@
 
         <div class="search-wrap" v-if="(results.queryResults !== undefined) && (results.queryResults.length > 0)">
             <div class="resultTotal">{{results.queryResults.length}} result(s) found</div>
+            <div class="resultSort">
+                <label for="sortList">Sort By&nbsp;</label>
+                <select id="sortList" @change="sortResults($event)">
+                    <option value="FirstName">First Name</option>
+                    <option value="LastName">Last Name</option>
+                    <option value="District">District / Office</option>
+                    <option value="ComplexArea">Complex Area / Branch</option>
+                    <option value="Complex">Complex / Section</option>
+                    <option value="School">School / Sub-Section</option>
+                    <option value="Position">Position</option>
+                </select>
+            </div>
         </div>
         
         <br />
@@ -80,11 +92,58 @@ import { setTimeout } from 'timers';
             })
             this.resultSize += 10;
             if(this.resultSize >= this.resultsArray.length) {
-            this.lazyLoadTrigger = false;
-            this.reachedEnd = true;
+                this.lazyLoadTrigger = false;
+                this.reachedEnd = true;
             }else{
                 this.lazyLoadTrigger = true;
             }
+        }
+
+        sortResults(event: any): void{
+            this.lazyLoadTrigger = false;
+            this.lazyResults = [];
+            let tempArray = this.resultsArray.sort(function(a,b){
+                let aVal: string = '';
+                let bVal: string = '';
+                switch ((document.getElementById('sortList') as HTMLSelectElement).value){
+                    case "FirstName":
+                        aVal = a.firstName;
+                        bVal = b.firstName;
+                        break;
+                    case "LastName":
+                        aVal = a.lastName;
+                        bVal = b.lastName;
+                        break;
+                    case "District":
+                        aVal = a.district;
+                        bVal = b.district;
+                        break;
+                    case "ComplexArea":
+                        aVal = a.complexArea;
+                        bVal = b.complexArea;
+                        break;
+                    case "Complex":
+                        aVal = a.complex;
+                        bVal = b.complex;
+                        break;
+                    case "School":
+                        aVal = a.school;
+                        bVal = b.school;
+                        break;
+                    case "Position":
+                        aVal = a.posn;
+                        bVal = b.posn;
+                }
+                if(a.firstName === 'Vacant') return 1;
+                if(aVal.toLowerCase() > bVal.toLowerCase()) return 1;
+                if(aVal.toLowerCase() < bVal.toLowerCase()) return -1;
+                return 0;
+            });
+            this.resultsArray = [];
+            this.resultsArray = tempArray;
+            this.resultSize = 0;
+            this.reachedEnd = false;
+            this.lazyLoadTrigger = true;
         }
 
         ReturnedSearchOptions(event: string): void {
@@ -103,7 +162,8 @@ import { setTimeout } from 'timers';
                 this.lazyLoadTrigger = false;
                 this.reachedEnd = true;
             }
-            setTimeout(() => {(document.getElementById('top-separator') as HTMLElement).scrollIntoView({behavior:"smooth", block:"start"})},300);
+            setTimeout(() => {(document.getElementById('top-separator') as HTMLElement).scrollIntoView({behavior:"smooth", block:"start"}); 
+            (document.getElementById('sortList') as HTMLSelectElement).selectedIndex = 0;},300);
         }
     }
 </script>
@@ -142,6 +202,14 @@ import { setTimeout } from 'timers';
         float:left;
         font-size:.8em;
         width:140px;
+        padding-top:5px;
+    }
+
+    .resultSort{
+        float:right;
+        font-size:.8em;
+        height:40px;
+        margin-right:10px;
     }
 
     #load-more{
