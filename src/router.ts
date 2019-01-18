@@ -38,14 +38,9 @@ export default new Router({
             component: (() => import("@/views/Admin_Users.vue"))
         },
         {
-            path: "/404-page-not-found",
-            name: "404",
+            path: "*",
+            name: "404 - Page Not Found",
             component: (() => import("@/views/404.vue"))
-        },
-        // {
-        //     path: "*",
-        //     name: "redirect",
-        //     redirect: "/404-page-not-found"
-        // }
+        }
     ]
 });

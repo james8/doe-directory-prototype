@@ -1,15 +1,15 @@
 <template>
     <div id="navigation-tabs" @keyup="CloseMobileMenu($event);">
         <ul class="menu normalMenu" role="menu">
-            <li class="menuItem" role="menuitem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')">
-                <router-link :to="route.path">{{ route.name }}</router-link>
+            <li class="menuItem" role="menuitem" v-for="activeRoute in activeRoutes" :key="activeRoute.id">
+                <router-link :to="activeRoute.path">{{ activeRoute.name }}</router-link>
             </li>
             <li class="portal menuItem" role="menuitem" v-if="!Auth_IsAuthenticated()">
                 <button type="button" @click="Auth_Login()">Sign In</button>
             </li>
             <div class="portal" v-if="Auth_IsAuthenticated()">
-                <li class="menuItem" role="menuitem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.id == portal">
-                    <button type="button" @click="ChangePortal(portalTab.route);">{{ portalTab.title }}</button>
+                <li class="menuItem" role="menuitem">
+                    <button type="button" @click="ChangePortal(activePortalTab.route);">{{ activePortalTab.title }}</button>
                 </li>
                 <li class="menuItem" role="menuitem">
                     <button type="button" @click="Auth_Logout()">Sign Out</button>
@@ -20,15 +20,15 @@
         <div class="menu mobileMenu">
             <button type="button" class="menuToggle fas fa-bars" aria-label="open menu" @click="OpenMobileMenu();"></button>
             <ul role="menu" v-bind:class="cssMenuClass">
-                <li role="menuitem" class="menuItem" v-for="route in routes" :key="route.id" v-if="(route.portal === portal) && (route.name !== '404') && (route.name !== 'redirect')" inert>
-                    <router-link :to="route.path" @click.native="CloseMobileMenu();">{{ route.name }}</router-link>
+                <li role="menuitem" class="menuItem" v-for="activeRoute in activeRoutes" :key="activeRoute.id" inert>
+                    <router-link :to="activeRoute.path" @click.native="CloseMobileMenu();">{{ activeRoute.name }}</router-link>
                 </li>
                 <li role="menuitem" class="portal menuItem" v-if="!Auth_IsAuthenticated()" inert>
                     <button type="button" @click="Auth_Login()">Sign In</button>
                 </li>
                 <div class="portal" v-if="Auth_IsAuthenticated()">
-                    <li role="menuitem" class="menuItem" v-for="portalTab in portalTabs" :key="portalTab.id" v-if="portalTab.portal === portal" inert>
-                        <button type="button" @click="ChangePortal(portalTab.route); CloseMobileMenu();">{{ portalTab.title }}</button>
+                    <li role="menuitem" class="menuItem" inert>
+                        <button type="button" @click="ChangePortal(activePortalTab.route); CloseMobileMenu();">{{ activePortalTab.title }}</button>
                     </li>
                     <li role="menuitem" class="menuItem" inert>
                         <button type="button" @click="Auth_Logout()">Sign Out</button>
@@ -45,12 +45,12 @@
     import Auth from "@/mixins/Auth.ts";
 
     class PortalTab {
-        id: number = -1;
-        title: string = "";
-        route: string = "";
-        portal: boolean = false;    // portal shown
+        id: number;
+        title: string;
+        route: string;
+        portal: boolean;
 
-        constructor(id: number, title: string, route: string, portal: boolean) {
+        constructor(id: number = -1, title: string = "", route: string = "", portal: boolean = false) {
             this.id = id;
             this.title = title;
             this.route = route;
@@ -65,8 +65,10 @@
     })
     export default class NavigationTabs extends Vue {
         routes: Array<any> = [];
+        activeRoutes: Array<any> = [];
         portal: boolean = false;    // portal - 0: Public, 1: Admin
         portalTabs: Array<PortalTab> = [];
+        activePortalTab: PortalTab = new PortalTab();
         cssMenuClass: string = "";
 
         // Lifecycle Hooks
@@ -83,22 +85,30 @@
                 this.routes[i]['portal'] = (rootPath === 'admin');
             });
 
-            // Determin portal type (for reloading page) 
+            // Determine portal type (for reloading page) 
             this.portal = (window.location.pathname.includes('admin'));
-
-            // Redirect if not a defined route (redirecting in router causes some strange behavior)
-            const path = window.location.pathname;
-            if (this.routes.findIndex(route => (route.path === path)) === -1)
-                setTimeout(() => {
-                    this.$router.push("404-page-not-found");
-                }, 50);
+            this.DetermineLinks();
         }
 
         ChangePortal(route: string): void {
-            // setTimeout(() => {
-                this.$router.push(route);
-                this.portal = !this.portal;
-            // }, 2000);
+            this.$router.push(route);
+            this.portal = !this.portal;
+            this.DetermineLinks();
+        }
+
+        DetermineLinks(): void {
+            // portal route (Public/Admin)
+            this.activePortalTab = this.portalTabs[Number(this.portal)];
+
+            // routes
+            this.routes.forEach((route: any) => {
+                if (route.path !== "*") this.activeRoutes.push(route);
+                this.activeRoutes = this.activeRoutes.filter(activeRoute => {
+                    const isAdminPath: number = activeRoute.path.indexOf("admin");
+                    if (!this.portal) return (isAdminPath === -1);
+                    else return (isAdminPath > -1);
+                });
+            });
         }
 
         OpenMobileMenu(): void {
